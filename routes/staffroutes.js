@@ -4,10 +4,8 @@ const router = express.Router();
 const staffController = require("../controllers/staffController");
 const { isAdmin, isStaff } = require("../middlewares/auth");
 
-// Home (Public/General)
-router.get("/", staffController.home);
-
-// Dedicated Staff Workspace Portal (Staff only)
+// Dedicated Staff Workspace Portal / Homepage (Staff only)
+router.get("/", isStaff, staffController.portal);
 router.get("/portal", isStaff, staffController.portal);
 router.post("/availability", isStaff, staffController.updateAvailability);
 router.post("/change-password", isStaff, staffController.changePassword);

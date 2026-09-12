@@ -4,8 +4,9 @@ const router = express.Router();
 const complaintController = require("../controllers/complaintController");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth");
 
-// Home Dashboard (Public)
+// Home Dashboard (Public & Admin)
 router.get("/", complaintController.home);
+router.get("/admin", isAdmin, complaintController.home);
 
 // View Complaints (Public & Filterable)
 router.get("/view", complaintController.getdata);

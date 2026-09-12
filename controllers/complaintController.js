@@ -281,9 +281,9 @@ const complaintController = {
 
             await Complaints.create(req.body);
 
-            // If resident user, redirect to their profile to view the submitted complaint
-            if (req.session.role === "resident") {
-                return res.redirect("/profile?msg=" + encodeURIComponent(`Complaint #${req.body.complaintId} submitted successfully! Track progress below.`));
+            // If resident user, redirect to their user homepage to view the submitted complaint
+            if (req.session.role === "resident" || req.session.role === "user") {
+                return res.redirect("/user?msg=" + encodeURIComponent(`Complaint #${req.body.complaintId} submitted successfully! Track progress below.`));
             }
 
             res.redirect("/view?msg=" + encodeURIComponent(`Complaint #${req.body.complaintId} submitted successfully!`));

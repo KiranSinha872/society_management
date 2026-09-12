@@ -403,24 +403,24 @@
         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
             <% if (isAdmin) { %>
                 <div class="auth-badge"><span>🛡️</span> Admin: <%= adminEmail %></div>
-                <a class="portal-btn" href="/">🏠 Admin Dashboard</a>
+                <a class="portal-btn" href="/admin">🏠 Admin Dashboard</a>
                 <a class="portal-btn" href="/view">📋 Complaints</a>
                 <a class="portal-btn" href="/residents/view">👥 Users</a>
                 <a class="portal-btn" href="/staff/view">👷 Staff</a>
                 <a class="auth-link" href="/logout">🚪 Logout</a>
             <% } else if (isStaff && staffUser) { %>
                 <div class="staff-badge"><span>👷</span> Staff: <%= staffUser.name %> (<%= staffUser.specialty %>)</div>
-                <a class="portal-btn" href="/staff/portal">🏠 Staff Dashboard</a>
-                <a class="portal-btn" href="/staff/portal">🛠️ Assigned Complaints</a>
-                <a class="portal-btn" href="/staff/portal">👤 Profile</a>
-                <a class="portal-btn" href="/staff/portal">🔑 Change Password</a>
+                <a class="portal-btn" href="/staff">🏠 Staff Dashboard</a>
+                <a class="portal-btn" href="/staff">🛠️ Assigned Complaints</a>
+                <a class="portal-btn" href="/staff">👤 Profile</a>
+                <a class="portal-btn" href="/staff">🔑 Change Password</a>
                 <a class="auth-link" href="/logout">🚪 Logout</a>
             <% } else if (isResident && currentUser) { %>
                 <div class="resident-badge"><span>👤</span> <%= currentUser.name %></div>
-                <a class="portal-btn" href="/">🏠 Dashboard</a>
+                <a class="portal-btn" href="/user">🏠 User Dashboard</a>
                 <a class="portal-btn" href="/add">➕ Register Complaint</a>
-                <a class="portal-btn" href="/profile">📑 My Complaints</a>
-                <a class="portal-btn" href="/profile">👤 Profile</a>
+                <a class="portal-btn" href="/user">📑 My Complaints</a>
+                <a class="portal-btn" href="/user">👤 Profile</a>
                 <a class="auth-link" href="/logout">🚪 Logout</a>
             <% } else { %>
                 <a class="portal-btn" href="/login?returnTo=/add&msg=<%= encodeURIComponent('Please login or register to register a complaint.') %>">➕ Register Complaint</a>

@@ -9,9 +9,9 @@ const authController = {
     registerPage: (req, res) => {
         const returnTo = req.query.returnTo || null;
         if (req.session && req.session.user) {
-            if (req.session.role === "admin") return res.redirect(returnTo || "/");
-            if (req.session.role === "staff") return res.redirect(returnTo || "/staff/portal");
-            return res.redirect(returnTo || "/profile");
+            if (req.session.role === "admin") return res.redirect(returnTo || "/admin");
+            if (req.session.role === "staff") return res.redirect(returnTo || "/staff");
+            return res.redirect(returnTo || "/user");
         }
         const error = req.query.error || null;
         const msg = req.query.msg || null;
@@ -118,7 +118,7 @@ const authController = {
                 phone: newUser.phone
             };
 
-            const redirectTarget = returnTo || "/profile";
+            const redirectTarget = returnTo || "/user";
             const welcomeMsg = encodeURIComponent(`Account created successfully! Welcome, ${newUser.name}.`);
             const delim = redirectTarget.includes("?") ? "&" : "?";
             return res.redirect(`${redirectTarget}${delim}msg=${welcomeMsg}`);
@@ -136,9 +136,9 @@ const authController = {
     loginPage: (req, res) => {
         const returnTo = req.query.returnTo || null;
         if (req.session && req.session.user) {
-            if (req.session.role === "admin") return res.redirect(returnTo || "/");
-            if (req.session.role === "staff") return res.redirect(returnTo || "/staff/portal");
-            return res.redirect(returnTo || "/profile");
+            if (req.session.role === "admin") return res.redirect(returnTo || "/admin");
+            if (req.session.role === "staff") return res.redirect(returnTo || "/staff");
+            return res.redirect(returnTo || "/user");
         }
         const error = req.query.error || null;
         const msg = req.query.msg || null;
@@ -163,15 +163,15 @@ const authController = {
             const adminEmail = (process.env.ADMIN_EMAIL || "sinhakiran872@gmail.com").toLowerCase();
             const adminPassword = process.env.ADMIN_PASSWORD || "Kiran@2006";
 
-            // 1. Check Admin Credentials
+            // 1. Check Admin Credentials -> Redirect to Admin Homepage (/admin)
             if (inputEmail === adminEmail && inputPassword === adminPassword) {
                 req.session.role = "admin";
                 req.session.adminEmail = adminEmail;
                 req.session.user = { name: "Society Admin", email: adminEmail, role: "admin" };
-                return res.redirect((returnTo || "/") + "?msg=" + encodeURIComponent("Welcome back, Admin!"));
+                return res.redirect((returnTo || "/admin") + "?msg=" + encodeURIComponent("Welcome back, Admin!"));
             }
 
-            // 2. Check Maintenance Staff Credentials
+            // 2. Check Maintenance Staff Credentials -> Redirect to Staff Homepage (/staff)
             const staffMember = await Staff.findOne({ email: inputEmail });
             if (staffMember) {
                 let isStaffMatch = false;
@@ -198,11 +198,11 @@ const authController = {
                         staffId: staffMember.staffId,
                         role: "staff" 
                     };
-                    return res.redirect((returnTo || "/staff/portal") + "?msg=" + encodeURIComponent(`Welcome back, ${staffMember.name}!`));
+                    return res.redirect((returnTo || "/staff") + "?msg=" + encodeURIComponent(`Welcome back, ${staffMember.name}!`));
                 }
             }
 
-            // 3. Check Resident / User Credentials with bcrypt
+            // 3. Check Resident / User Credentials with bcrypt -> Redirect to User Homepage (/user)
             const user = await User.findOne({ email: inputEmail });
             if (user) {
                 const isMatch = await bcrypt.compare(inputPassword, user.password);
@@ -217,7 +217,7 @@ const authController = {
                         flatNo: user.flatNo,
                         phone: user.phone
                     };
-                    const target = returnTo || "/profile";
+                    const target = returnTo || "/user";
                     const delim = target.includes("?") ? "&" : "?";
                     return res.redirect(`${target}${delim}msg=` + encodeURIComponent(`Welcome back, ${user.name}!`));
                 }
@@ -244,17 +244,17 @@ const authController = {
             await connectDB();
             const sessionUser = req.session.user;
             if (!sessionUser) {
-                return res.redirect("/login?msg=" + encodeURIComponent("Please login to view your profile.") + "&returnTo=/profile");
+                return res.redirect("/login?msg=" + encodeURIComponent("Please login to view your dashboard.") + "&returnTo=/user");
             }
 
             // If Admin
             if (req.session.role === "admin") {
-                return res.redirect("/?msg=" + encodeURIComponent("Welcome Admin!"));
+                return res.redirect("/admin?msg=" + encodeURIComponent("Welcome Admin!"));
             }
 
             // If Staff
             if (req.session.role === "staff") {
-                return res.redirect("/staff/portal");
+                return res.redirect("/staff?msg=" + encodeURIComponent("Welcome Staff!"));
             }
 
             // Resident Profile - fetch user details and their filed complaints (by userId OR email)
