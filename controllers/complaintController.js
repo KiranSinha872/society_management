@@ -8,17 +8,7 @@ const complaintController = {
     home: async (req, res) => {
         try {
             await connectDB();
-            const totalComplaints = await Complaints.countDocuments().catch(() => 0);
-            const pendingComplaints = await Complaints.countDocuments({ status: "Pending" }).catch(() => 0);
-            const assignedComplaints = await Complaints.countDocuments({ status: "Assigned" }).catch(() => 0);
-            const inProgressComplaints = await Complaints.countDocuments({ status: "In Progress" }).catch(() => 0);
-            const resolvedComplaints = await Complaints.countDocuments({ status: "Resolved" }).catch(() => 0);
-            const rejectedComplaints = await Complaints.countDocuments({ status: "Rejected" }).catch(() => 0);
-            
-            const totalResidents = await Residents.countDocuments().catch(() => 0);
-            const totalStaff = await Staff.countDocuments().catch(() => 0);
 
-            // Category-wise Breakdown
             const categories = [
                 "Water Supply & Plumbing",
                 "Electricity & Power",
@@ -31,43 +21,133 @@ const complaintController = {
                 "Common Amenities & Garden",
                 "Other"
             ];
-
-            const categoryBreakdown = await Promise.all(
-                categories.map(async (cat) => {
-                    const count = await Complaints.countDocuments({ category: cat }).catch(() => 0);
-                    const resolved = await Complaints.countDocuments({ category: cat, status: "Resolved" }).catch(() => 0);
-                    return {
-                        category: cat,
-                        count,
-                        resolved,
-                        pending: count - resolved
-                    };
-                })
-            );
-
-            // Block-wise Breakdown (Wings A to E)
             const blocks = ["A", "B", "C", "D", "E"];
-            const blockBreakdown = await Promise.all(
-                blocks.map(async (block) => {
-                    const count = await Complaints.countDocuments({ wing: block }).catch(() => 0);
-                    const pending = await Complaints.countDocuments({ wing: block, status: { $ne: "Resolved" } }).catch(() => 0);
-                    const resolved = await Complaints.countDocuments({ wing: block, status: "Resolved" }).catch(() => 0);
-                    return {
-                        block: "Block " + block,
-                        wing: block,
-                        count,
-                        pending,
-                        resolved
-                    };
-                })
-            );
 
-            // Recent status updates
-            const recentActivity = await Complaints.find()
-                .sort({ updatedAt: -1 })
-                .limit(5)
-                .select("complaintId title residentName wing flatNo status updatedAt assignedStaff")
-                .catch(() => []);
+            // High-performance single aggregation + concurrent counts
+            const [aggResult, totalResidents, totalStaff] = await Promise.all([
+                Complaints.aggregate([
+                    {
+                        $facet: {
+                            statusCounts: [
+                                { $group: { _id: "$status", count: { $sum: 1 } } }
+                            ],
+                            categoryStats: [
+                                {
+                                    $group: {
+                                        _id: { category: "$category", status: "$status" },
+                                        count: { $sum: 1 }
+                                    }
+                                }
+                            ],
+                            blockStats: [
+                                {
+                                    $group: {
+                                        _id: { wing: "$wing", status: "$status" },
+                                        count: { $sum: 1 }
+                                    }
+                                }
+                            ],
+                            recentActivity: [
+                                { $sort: { updatedAt: -1 } },
+                                { $limit: 5 },
+                                {
+                                    $project: {
+                                        complaintId: 1,
+                                        title: 1,
+                                        residentName: 1,
+                                        wing: 1,
+                                        flatNo: 1,
+                                        status: 1,
+                                        updatedAt: 1,
+                                        assignedStaff: 1
+                                    }
+                                }
+                            ],
+                            total: [
+                                { $count: "count" }
+                            ]
+                        }
+                    }
+                ]),
+                Residents.countDocuments().catch(() => 0),
+                Staff.countDocuments().catch(() => 0)
+            ]);
+
+            const facet = (aggResult && aggResult[0]) ? aggResult[0] : {};
+
+            // Parse status counts
+            const statusMap = {};
+            if (facet.statusCounts) {
+                facet.statusCounts.forEach(s => {
+                    if (s._id) statusMap[s._id] = s.count;
+                });
+            }
+
+            const totalComplaints = (facet.total && facet.total[0]) ? facet.total[0].count : 0;
+            const pendingComplaints = statusMap["Pending"] || 0;
+            const assignedComplaints = statusMap["Assigned"] || 0;
+            const inProgressComplaints = statusMap["In Progress"] || 0;
+            const resolvedComplaints = statusMap["Resolved"] || 0;
+            const rejectedComplaints = statusMap["Rejected"] || 0;
+
+            // Parse Category breakdown
+            const categoryStatsMap = {};
+            if (facet.categoryStats) {
+                facet.categoryStats.forEach(item => {
+                    if (item._id && item._id.category) {
+                        const cat = item._id.category;
+                        if (!categoryStatsMap[cat]) {
+                            categoryStatsMap[cat] = { count: 0, resolved: 0 };
+                        }
+                        categoryStatsMap[cat].count += item.count;
+                        if (item._id.status === "Resolved") {
+                            categoryStatsMap[cat].resolved += item.count;
+                        }
+                    }
+                });
+            }
+
+            const categoryBreakdown = categories.map(cat => {
+                const stat = categoryStatsMap[cat] || { count: 0, resolved: 0 };
+                return {
+                    category: cat,
+                    count: stat.count,
+                    resolved: stat.resolved,
+                    pending: stat.count - stat.resolved
+                };
+            });
+
+            // Parse Block breakdown
+            const blockStatsMap = {};
+            if (facet.blockStats) {
+                facet.blockStats.forEach(item => {
+                    if (item._id && item._id.wing) {
+                        const wing = item._id.wing;
+                        if (!blockStatsMap[wing]) {
+                            blockStatsMap[wing] = { count: 0, resolved: 0, pending: 0 };
+                        }
+                        blockStatsMap[wing].count += item.count;
+                        if (item._id.status === "Resolved") {
+                            blockStatsMap[wing].resolved += item.count;
+                        } else {
+                            blockStatsMap[wing].pending += item.count;
+                        }
+                    }
+                });
+            }
+
+            const blockBreakdown = blocks.map(block => {
+                const stat = blockStatsMap[block] || { count: 0, resolved: 0, pending: 0 };
+                return {
+                    block: "Block " + block,
+                    wing: block,
+                    count: stat.count,
+                    pending: stat.pending,
+                    resolved: stat.resolved
+                };
+            });
+
+            const recentActivity = facet.recentActivity || [];
 
             res.render("home.ejs", {
                 stats: {
@@ -123,8 +203,10 @@ const complaintController = {
                 ];
             }
 
-            const complaint = await Complaints.find(filter).sort({ createdAt: -1 }).catch(() => []);
-            const staffList = await Staff.find().select("name specialty staffId availability").catch(() => []);
+            const [complaint, staffList] = await Promise.all([
+                Complaints.find(filter).sort({ createdAt: -1 }).lean().catch(() => []),
+                Staff.find().select("name specialty staffId availability").lean().catch(() => [])
+            ]);
 
             res.render("complaints.ejs", { 
                 complaint,
@@ -152,7 +234,7 @@ const complaintController = {
     addpage: async (req, res) => {
         try {
             await connectDB();
-            const staffList = await Staff.find().select("name specialty staffId availability").catch(() => []);
+            const staffList = await Staff.find().select("name specialty staffId availability").lean().catch(() => []);
             res.render("complaintform.ejs", { staffList });
         } catch (err) {
             res.render("complaintform.ejs", { staffList: [] });
@@ -195,11 +277,15 @@ const complaintController = {
     editpage: async (req, res) => {
         try {
             await connectDB();
-            const complaint = await Complaints.findById(req.params.id);
+            const [complaint, staffList] = await Promise.all([
+                Complaints.findById(req.params.id).lean(),
+                Staff.find().select("name specialty staffId availability").lean().catch(() => [])
+            ]);
+
             if (!complaint) {
                 return res.status(404).send("Complaint ticket not found. <a href='/view'>Back to list</a>");
             }
-            const staffList = await Staff.find().select("name specialty staffId availability").catch(() => []);
+
             res.render("complaintedit.ejs", { complaint, staffList });
         } catch (err) {
             console.error("Error finding complaint:", err);
@@ -291,3 +377,4 @@ const complaintController = {
 };
 
 module.exports = complaintController;
+

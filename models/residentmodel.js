@@ -64,4 +64,9 @@ const residentmodel = new mongoose.Schema({
     timestamps: true
 });
 
+// Production Indexes for resident listing and lookups
+residentmodel.index({ wing: 1, flatNo: 1 });
+residentmodel.index({ residentType: 1 });
+
 module.exports = mongoose.model("resident", residentmodel);
+

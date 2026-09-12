@@ -109,4 +109,14 @@ const complaintmodel = new mongoose.Schema({
     timestamps: true
 });
 
+// Production Indexes for high-speed queries & dashboard aggregation
+complaintmodel.index({ status: 1 });
+complaintmodel.index({ category: 1, status: 1 });
+complaintmodel.index({ wing: 1, status: 1 });
+complaintmodel.index({ priority: 1 });
+complaintmodel.index({ assignedStaff: 1 });
+complaintmodel.index({ createdAt: -1 });
+complaintmodel.index({ updatedAt: -1 });
+
 module.exports = mongoose.model("complaint", complaintmodel);
+

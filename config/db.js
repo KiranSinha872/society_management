@@ -12,7 +12,13 @@ if (!cached) {
 }
 
 async function connectDB() {
+    // 1. If already connected, return cached connection immediately
     if (cached.conn && mongoose.connection.readyState === 1) {
+        return cached.conn;
+    }
+
+    if (mongoose.connection.readyState === 1) {
+        cached.conn = mongoose;
         return cached.conn;
     }
 
@@ -21,13 +27,17 @@ async function connectDB() {
         return null;
     }
 
+    // 2. If a connection is in progress, await the existing promise
     if (!cached.promise) {
         const opts = {
-            bufferCommands: false,
-            serverSelectionTimeoutMS: 4000,
-            connectTimeoutMS: 4000,
-            family: 4,
-            maxPoolSize: 10
+            bufferCommands: true, // Allow Mongoose to buffer operations briefly during initial handshake
+            serverSelectionTimeoutMS: 5000, // Fail fast after 5s if Atlas is unreachable
+            connectTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+            maxPoolSize: 10,
+            minPoolSize: 1,
+            maxIdleTimeMS: 10000,
+            family: 4
         };
 
         cached.promise = mongoose.connect(mongoUrl, opts).then((mongooseInstance) => {
@@ -35,8 +45,9 @@ async function connectDB() {
             return mongooseInstance;
         }).catch((err) => {
             cached.promise = null;
+            cached.conn = null;
             console.error("❌ MongoDB Connection Error:", err.message);
-            return null;
+            throw err;
         });
     }
 
@@ -44,11 +55,25 @@ async function connectDB() {
         cached.conn = await cached.promise;
     } catch (e) {
         cached.promise = null;
+        cached.conn = null;
         console.error("Database connection failed:", e.message);
     }
 
     return cached.conn;
 }
+
+// Connection event listeners for state management
+mongoose.connection.on("disconnected", () => {
+    console.warn("⚠️ MongoDB Disconnected. Resetting cached connection pool.");
+    cached.conn = null;
+    cached.promise = null;
+});
+
+mongoose.connection.on("error", (err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    cached.conn = null;
+    cached.promise = null;
+});
 
 // Initial connection attempt
 connectDB().catch(() => {});
@@ -56,3 +81,4 @@ connectDB().catch(() => {});
 const db = mongoose.connection;
 
 module.exports = { db, connectDB };
+

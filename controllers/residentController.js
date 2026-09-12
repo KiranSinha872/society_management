@@ -28,7 +28,7 @@ const residentController = {
                 ];
             }
 
-            const resident = await Residents.find(filter).sort({ wing: 1, flatNo: 1 }).catch(() => []);
+            const resident = await Residents.find(filter).sort({ wing: 1, flatNo: 1 }).lean().catch(() => []);
             res.render("residents.ejs", { 
                 resident,
                 filter: { wing: wing || "All", residentType: residentType || "All", search: search || "" }
@@ -60,7 +60,7 @@ const residentController = {
     editpage: async (req, res) => {
         try {
             await connectDB();
-            const resident = await Residents.findById(req.params.id);
+            const resident = await Residents.findById(req.params.id).lean();
             if (!resident) {
                 return res.status(404).send("Resident record not found. <a href='/residents/view'>Back to list</a>");
             }
@@ -95,3 +95,4 @@ const residentController = {
 };
 
 module.exports = residentController;
+

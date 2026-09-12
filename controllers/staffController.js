@@ -29,7 +29,7 @@ const staffController = {
                 ];
             }
 
-            const staff = await Staff.find(filter).sort({ specialty: 1, name: 1 }).catch(() => []);
+            const staff = await Staff.find(filter).sort({ specialty: 1, name: 1 }).lean().catch(() => []);
             res.render("staff.ejs", {
                 staff,
                 filter: { specialty: specialty || "All", availability: availability || "All", search: search || "" }
@@ -71,7 +71,7 @@ const staffController = {
     editpage: async (req, res) => {
         try {
             await connectDB();
-            const staff = await Staff.findById(req.params.id);
+            const staff = await Staff.findById(req.params.id).lean();
             if (!staff) {
                 return res.status(404).send("Staff member not found. <a href='/staff/view'>Back to list</a>");
             }
@@ -115,7 +115,7 @@ const staffController = {
                 return res.redirect("/login");
             }
 
-            const currentStaff = await Staff.findById(staffUser._id);
+            const currentStaff = await Staff.findById(staffUser._id).lean();
             if (!currentStaff) {
                 return res.redirect("/login");
             }
@@ -123,7 +123,7 @@ const staffController = {
 
             const assignedComplaints = await Complaints.find({
                 assignedStaff: { $regex: staffNamePattern, $options: "i" }
-            }).sort({ createdAt: -1 }).catch(() => []);
+            }).sort({ createdAt: -1 }).lean().catch(() => []);
 
             const pendingTasks = assignedComplaints.filter(c => c.status !== "Resolved" && c.status !== "Rejected");
             const resolvedTasks = assignedComplaints.filter(c => c.status === "Resolved");
@@ -162,3 +162,4 @@ const staffController = {
 };
 
 module.exports = staffController;
+

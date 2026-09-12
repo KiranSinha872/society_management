@@ -68,4 +68,9 @@ const staffmodel = new mongoose.Schema({
     timestamps: true
 });
 
+// Production Indexes for staff listing, filtering & task assignment
+staffmodel.index({ specialty: 1, name: 1 });
+staffmodel.index({ availability: 1 });
+
 module.exports = mongoose.model("staff", staffmodel);
+

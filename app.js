@@ -6,6 +6,9 @@ const path = require("path");
 const { connectDB } = require("./config/db");
 const app = express();
 
+// Enable reverse proxy trust for Vercel edge/lambdas
+app.set("trust proxy", 1);
+
 // Serverless MongoDB Connection Middleware
 app.use(async (req, res, next) => {
     try {
@@ -21,7 +24,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET || "society_secret_key_2026",
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 } // 24 hours
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24, // 24 hours
+        httpOnly: true,
+        sameSite: "lax"
+    }
 }));
 
 // Body parser Middleware
@@ -65,7 +72,7 @@ app.use("/staff", staffRoutes);
 
 // Global Error Handler (Prevents serverless function crash / hang)
 app.use((err, req, res, next) => {
-    console.error("Application Error:", err);
+    console.error("Application Error:", err.message || err);
     res.status(500).send("<h3>Something went wrong.</h3><p>" + (err.message || "") + "</p><a href='/'>Go to Home</a>");
 });
 
@@ -75,7 +82,7 @@ app.use((req, res) => {
 });
 
 // Server (Local development only - not when running as a Vercel Serverless Function)
-if (!process.env.VERCEL && process.env.NODE_ENV !== "production") {
+if (!process.env.VERCEL) {
     const PORT = process.env.PORT || 3007;
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
@@ -83,3 +90,4 @@ if (!process.env.VERCEL && process.env.NODE_ENV !== "production") {
 }
 
 module.exports = app;
+
