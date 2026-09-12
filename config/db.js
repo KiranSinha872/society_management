@@ -2,35 +2,42 @@ require("dotenv").config();
 
 const mongoose = require("mongoose");
 
-const mongoUrl = process.env.MONGO_URL || process.env.MONGODB_URI || "mongodb://localhost:27017/society_complaint_db";
+const mongoUrl = process.env.MONGO_URL || process.env.MONGODB_URI;
 
-console.log("Connecting to MongoDB Database...");
+const connectDB = async () => {
+    if (mongoose.connection.readyState >= 1) {
+        return;
+    }
+    if (!mongoUrl) {
+        console.error("CRITICAL: MONGO_URL environment variable is not defined.");
+        return;
+    }
+    try {
+        await mongoose.connect(mongoUrl, {
+            serverSelectionTimeoutMS: 5000,
+            family: 4
+        });
+        console.log("✅ MongoDB Connected");
+    } catch (err) {
+        console.error("❌ MongoDB Connection Error:", err.message);
+    }
+};
 
-// Disable buffering so pages never hang for 10s if offline/connecting
-mongoose.set("bufferCommands", false);
-
-mongoose.connect(mongoUrl, {
-    serverSelectionTimeoutMS: 5000,
-    family: 4 // Force IPv4 to prevent macOS IPv6 lookup delay
-}).then(() => {
-    console.log("✅ MongoDB Atlas Connected Successfully!");
-}).catch((err) => {
-    console.error("❌ MongoDB Connection Error:", err.message);
-    console.error("👉 Please ensure IP Access (0.0.0.0/0) is Active in MongoDB Atlas Network Access tab.");
-});
+// Initial connection
+connectDB();
 
 const db = mongoose.connection;
 
 db.on("connected", () => {
-    console.log("MongoDB state: Connected");
+    console.log("MongoDB Connection state: Connected");
 });
 
 db.on("disconnected", () => {
-    console.log("MongoDB state: Disconnected");
+    console.log("MongoDB Connection state: Disconnected");
 });
 
 db.on("error", (err) => {
     console.error("MongoDB Runtime Error:", err.message);
 });
 
-module.exports = db;
+module.exports = { db, connectDB };

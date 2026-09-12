@@ -3,10 +3,18 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
+const { connectDB } = require("./config/db");
 const app = express();
 
-// Database Connection
-require("./config/db");
+// Serverless MongoDB Connection Middleware
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+    } catch (e) {
+        console.error("DB connection error in middleware:", e);
+    }
+    next();
+});
 
 // Session Middleware
 app.use(session({
