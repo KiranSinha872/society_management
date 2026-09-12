@@ -364,11 +364,30 @@
         .s-Resolved { background: #dcfce7; color: #15803d; }
         .s-Rejected { background: #f1f5f9; color: #64748b; }
 
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 13px;
-            color: #94a3b8;
+        .resident-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-register-top {
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: #2563eb;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(37,99,235,0.2);
+        }
+
+        .btn-register-top:hover {
+            background: #1d4ed8;
         }
     </style>
 </head>
@@ -391,10 +410,19 @@
             </div>
             <a class="portal-btn" href="/staff/portal">📋 My Workspace</a>
             <a class="auth-link" href="/logout">🚪 Logout</a>
+        <% } else if (isResident && currentUser) { %>
+            <div class="resident-badge">
+                <span>👤</span>
+                <span><%= currentUser.name %> <% if (currentUser.wing && currentUser.flatNo) { %>(W-<%= currentUser.wing %>-<%= currentUser.flatNo %>)<% } %></span>
+            </div>
+            <a class="portal-btn" href="/profile">📑 My Profile</a>
+            <a class="auth-link" href="/logout">🚪 Logout</a>
         <% } else { %>
-            <a class="login-btn-top" href="/login">🔐 Portal Login (Admin / Staff)</a>
+            <a class="login-btn-top" href="/login">🔐 Login</a>
+            <a class="btn-register-top" href="/register">📝 Register</a>
         <% } %>
     </div>
+
 
     <div class="header">
         <h1>🏢 Society Complaint & Facility Portal</h1>

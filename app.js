@@ -37,13 +37,16 @@ app.use(express.json());
 
 // Pass session/role state to all EJS templates
 app.use((req, res, next) => {
+    res.locals.currentUser = (req.session && req.session.user) ? req.session.user : null;
     res.locals.isAdmin = (req.session && req.session.role === "admin") ? true : false;
     res.locals.isStaff = (req.session && req.session.role === "staff") ? true : false;
-    res.locals.userRole = (req.session && req.session.role) ? req.session.role : "resident";
+    res.locals.isResident = (req.session && req.session.role === "resident" && req.session.user) ? true : false;
+    res.locals.userRole = (req.session && req.session.role) ? req.session.role : "guest";
     res.locals.adminEmail = (req.session && req.session.adminEmail) ? req.session.adminEmail : null;
     res.locals.staffUser = (req.session && req.session.staffUser) ? req.session.staffUser : null;
     next();
 });
+
 
 // Static Files
 app.use(express.static(path.join(__dirname, "public")));

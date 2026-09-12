@@ -144,17 +144,18 @@
         <div class="form-row">
             <div class="form-group">
                 <label>Resident Full Name *</label>
-                <input type="text" name="residentName" placeholder="Full Name" required>
+                <input type="text" name="residentName" placeholder="Full Name" value="<%= (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : '' %>" required>
             </div>
             <div class="form-group">
                 <label>Block / Wing *</label>
                 <select name="wing" required>
-                    <option value="" disabled selected>Select Block</option>
-                    <option value="A">Block A</option>
-                    <option value="B">Block B</option>
-                    <option value="C">Block C</option>
-                    <option value="D">Block D</option>
-                    <option value="E">Block E</option>
+                    <% const curWing = (typeof currentUser !== 'undefined' && currentUser && currentUser.wing) ? currentUser.wing : ''; %>
+                    <option value="" disabled <%= !curWing ? 'selected' : '' %>>Select Block</option>
+                    <option value="A" <%= curWing === 'A' ? 'selected' : '' %>>Block A</option>
+                    <option value="B" <%= curWing === 'B' ? 'selected' : '' %>>Block B</option>
+                    <option value="C" <%= curWing === 'C' ? 'selected' : '' %>>Block C</option>
+                    <option value="D" <%= curWing === 'D' ? 'selected' : '' %>>Block D</option>
+                    <option value="E" <%= curWing === 'E' ? 'selected' : '' %>>Block E</option>
                 </select>
             </div>
         </div>
@@ -162,7 +163,7 @@
         <div class="form-row">
             <div class="form-group">
                 <label>Flat Number *</label>
-                <input type="text" name="flatNo" placeholder="e.g. 302 or A-101" required>
+                <input type="text" name="flatNo" placeholder="e.g. 302 or A-101" value="<%= (typeof currentUser !== 'undefined' && currentUser && currentUser.flatNo) ? currentUser.flatNo : '' %>" required>
             </div>
             <div class="form-group">
                 <label>Location / Area</label>
@@ -173,13 +174,14 @@
         <div class="form-row">
             <div class="form-group">
                 <label>Phone Number *</label>
-                <input type="tel" name="phone" placeholder="Mobile Number" required>
+                <input type="tel" name="phone" placeholder="Mobile Number" value="<%= (typeof currentUser !== 'undefined' && currentUser && currentUser.phone) ? currentUser.phone : '' %>" required>
             </div>
             <div class="form-group">
                 <label>Email Address *</label>
-                <input type="email" name="email" placeholder="name@example.com" required>
+                <input type="email" name="email" placeholder="name@example.com" value="<%= (typeof currentUser !== 'undefined' && currentUser && currentUser.email) ? currentUser.email : '' %>" required>
             </div>
         </div>
+
 
         <div class="form-row">
             <div class="form-group">

@@ -1,3 +1,10 @@
+const isAuthenticated = (req, res, next) => {
+    if (req.session && (req.session.user || req.session.role)) {
+        return next();
+    }
+    return res.redirect("/login?msg=" + encodeURIComponent("Please login to access this page."));
+};
+
 const isAdmin = (req, res, next) => {
     if (req.session && req.session.role === "admin") {
         return next();
@@ -19,4 +26,5 @@ const isStaffOrAdmin = (req, res, next) => {
     return res.redirect("/login?msg=" + encodeURIComponent("Please login as Admin or Staff."));
 };
 
-module.exports = { isAdmin, isStaff, isStaffOrAdmin };
+module.exports = { isAuthenticated, isAdmin, isStaff, isStaffOrAdmin };
+

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile & Tickets - Society Portal</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            min-height: 100vh;
+            padding: 20px 15px 50px;
+        }
+
+        .main-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .brand-link {
+            text-decoration: none;
+            color: #0f172a;
+            font-weight: 700;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auth-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav {
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-home {
+            background: white;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-home:hover { background: #f1f5f9; }
+
+        .btn-logout {
+            background: white;
+            color: #ef4444;
+            border: 1px solid #fca5a5;
+        }
+
+        .btn-logout:hover { background: #fee2e2; }
+
+        /* Notification */
+        .alert-msg {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        /* Profile Header Card */
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+
+        .user-details h2 {
+            font-size: 19px;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .user-details p {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .badge-role {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action-primary {
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 9px 16px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .btn-action-primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Metric Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .stat-card .num {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .stat-card.pending .num { color: #d97706; }
+        .stat-card.in-prog .num { color: #0284c7; }
+        .stat-card.resolved .num { color: #16a34a; }
+
+        /* Tickets Section */
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .panel-header h3 {
+            font-size: 17px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ticket-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .ticket-card:hover {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+
+        .ticket-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ticket-id {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .ticket-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .ticket-meta {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .badge-status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+
+        .s-Pending { background: #fef3c7; color: #b45309; }
+        .s-Assigned { background: #ede9fe; color: #6d28d9; }
+        .s-In_Progress, .s-In-Progress { background: #dbeafe; color: #1d4ed8; }
+        .s-Resolved { background: #dcfce7; color: #15803d; }
+        .s-Rejected { background: #f1f5f9; color: #64748b; }
+
+        .empty-state {
+            text-align: center;
+            padding: 36px 16px;
+            color: #64748b;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .footer {
+            margin-top: 36px;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+
+    <!-- Top Navigation Bar -->
+    <div class="top-bar">
+        <a class="brand-link" href="/">
+            <span>🏢</span> Society Portal
+        </a>
+        <div class="auth-actions">
+            <a class="btn-nav btn-home" href="/">🏠 Dashboard</a>
+            <a class="btn-nav btn-home" href="/view">📋 All Complaints</a>
+            <a class="btn-nav btn-logout" href="/logout">🚪 Logout</a>
+        </div>
+    </div>
+
+    <% if (typeof msg !== 'undefined' && msg) { %>
+        <div class="alert-msg">✅ <%= msg %></div>
+    <% } %>
+
+    <!-- User Profile Card -->
+    <div class="profile-card">
+        <div class="user-info">
+            <div class="avatar">
+                <%= (user.name || 'U').charAt(0).toUpperCase() %>
+            </div>
+            <div class="user-details">
+                <h2><%= user.name %></h2>
+                <p>📧 <%= user.email %></p>
+                <% if (user.wing || user.flatNo) { %>
+                    <p>📍 Wing <%= user.wing || 'A' %> - Flat <%= user.flatNo || 'N/A' %></p>
+                <% } %>
+                <% if (user.phone) { %>
+                    <p>📞 <%= user.phone %></p>
+                <% } %>
+                <span class="badge-role">Resident Member</span>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <a class="btn-action-primary" href="/add">➕ Register New Complaint</a>
+        </div>
+    </div>
+
+    <!-- User Complaint Metrics -->
+    <% if (typeof stats !== 'undefined') { %>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="num"><%= stats.totalFiled %></div>
+            <div class="label">My Tickets</div>
+        </div>
+        <div class="stat-card pending">
+            <div class="num"><%= stats.pendingCount %></div>
+            <div class="label">Open / Pending</div>
+        </div>
+        <div class="stat-card in-prog">
+            <div class="num"><%= stats.inProgressCount %></div>
+            <div class="label">In Progress</div>
+        </div>
+        <div class="stat-card resolved">
+            <div class="num"><%= stats.resolvedCount %></div>
+            <div class="label">Resolved</div>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- User Complaint History -->
+    <div class="panel">
+        <div class="panel-header">
+            <h3>📑 My Maintenance Requests & Status</h3>
+            <span style="font-size: 13px; color: #64748b;"><%= complaints.length %> tickets</span>
+        </div>
+
+        <% if (complaints && complaints.length > 0) { %>
+            <div class="ticket-list">
+                <% complaints.forEach(ticket => { %>
+                    <div class="ticket-card">
+                        <div class="ticket-main">
+                            <span class="ticket-id"><%= ticket.complaintId %></span>
+                            <span class="ticket-title"><%= ticket.title %></span>
+                            <span class="ticket-meta">
+                                📂 <%= ticket.category %> • 
+                                ⚡ Priority: <strong><%= ticket.priority %></strong> • 
+                                📅 <%= new Date(ticket.createdAt).toLocaleDateString() %>
+                                <% if (ticket.assignedStaff && ticket.assignedStaff !== 'Unassigned') { %>
+                                    • 👷 Assigned: <strong><%= ticket.assignedStaff %></strong>
+                                <% } %>
+                            </span>
+                        </div>
+                        <div>
+                            <span class="badge-status s-<%= ticket.status.replace(' ', '_') %>">
+                                <%= ticket.status %>
+                            </span>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <p>You haven't submitted any complaints yet.</p>
+                <a class="btn-action-primary" href="/add">➕ Register Your First Complaint</a>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="footer">
+        Society Facility & Complaint Management System &copy; <%= new Date().getFullYear() %>
+    </div>
+
+</div>
+
+</body>
+</html>
