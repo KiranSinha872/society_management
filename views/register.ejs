@@ -198,6 +198,8 @@
     <% } %>
 
     <form id="registerForm" action="/register" method="post" onsubmit="handleSubmit(event)">
+        <input type="hidden" name="returnTo" value="<%= (typeof returnTo !== 'undefined' && returnTo) ? returnTo : '' %>">
+
         <div class="form-group">
             <label>Full Name *</label>
             <input type="text" name="name" required placeholder="e.g. Aarav Sharma" value="<%= (typeof formData !== 'undefined' && formData.name) ? formData.name : '' %>">
@@ -251,8 +253,9 @@
     </form>
 
     <div class="switch-auth">
-        Already have an account? <a href="/login">Log in here</a>
+        Already have an account? <a href="/login<%= (typeof returnTo !== 'undefined' && returnTo) ? '?returnTo=' + encodeURIComponent(returnTo) : '' %>">Log in here</a>
     </div>
+
 
     <a class="back-link" href="/">← Return to Public Dashboard</a>
 </div>

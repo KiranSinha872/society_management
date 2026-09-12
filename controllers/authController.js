@@ -7,20 +7,21 @@ const { connectDB } = require("../config/db");
 const authController = {
 
     registerPage: (req, res) => {
+        const returnTo = req.query.returnTo || null;
         if (req.session && req.session.user) {
-            if (req.session.role === "admin") return res.redirect("/");
-            if (req.session.role === "staff") return res.redirect("/staff/portal");
-            return res.redirect("/profile");
+            if (req.session.role === "admin") return res.redirect(returnTo || "/");
+            if (req.session.role === "staff") return res.redirect(returnTo || "/staff/portal");
+            return res.redirect(returnTo || "/profile");
         }
         const error = req.query.error || null;
         const msg = req.query.msg || null;
-        res.render("register.ejs", { error, msg, formData: {} });
+        res.render("register.ejs", { error, msg, formData: {}, returnTo });
     },
 
     register: async (req, res) => {
         try {
             await connectDB();
-            const { name, email, password, confirmPassword, wing, flatNo, phone } = req.body;
+            const { name, email, password, confirmPassword, wing, flatNo, phone, returnTo } = req.body;
 
             const trimmedName = (name || "").trim();
             const trimmedEmail = (email || "").trim().toLowerCase();
@@ -37,7 +38,8 @@ const authController = {
                 return res.render("register.ejs", {
                     error: "Please provide your name, email address, and a secure password.",
                     msg: null,
-                    formData
+                    formData,
+                    returnTo
                 });
             }
 
@@ -46,7 +48,8 @@ const authController = {
                 return res.render("register.ejs", {
                     error: "Please enter a valid email address.",
                     msg: null,
-                    formData
+                    formData,
+                    returnTo
                 });
             }
 
@@ -54,7 +57,8 @@ const authController = {
                 return res.render("register.ejs", {
                     error: "Password must be at least 6 characters long.",
                     msg: null,
-                    formData
+                    formData,
+                    returnTo
                 });
             }
 
@@ -62,7 +66,8 @@ const authController = {
                 return res.render("register.ejs", {
                     error: "Passwords do not match. Please re-enter both passwords.",
                     msg: null,
-                    formData
+                    formData,
+                    returnTo
                 });
             }
 
@@ -72,7 +77,8 @@ const authController = {
                 return res.render("register.ejs", {
                     error: "This email is reserved for system administration. Please use another email or log in.",
                     msg: null,
-                    formData
+                    formData,
+                    returnTo
                 });
             }
 
@@ -81,7 +87,8 @@ const authController = {
                 return res.render("register.ejs", {
                     error: "An account with this email already exists. Please log in instead.",
                     msg: null,
-                    formData
+                    formData,
+                    returnTo
                 });
             }
 
@@ -111,39 +118,45 @@ const authController = {
                 phone: newUser.phone
             };
 
-            return res.redirect("/profile?msg=" + encodeURIComponent(`Account created successfully! Welcome to the society portal, ${newUser.name}.`));
+            const redirectTarget = returnTo || "/profile";
+            const welcomeMsg = encodeURIComponent(`Account created successfully! Welcome, ${newUser.name}.`);
+            const delim = redirectTarget.includes("?") ? "&" : "?";
+            return res.redirect(`${redirectTarget}${delim}msg=${welcomeMsg}`);
         } catch (err) {
             console.error("Registration error:", err.message || err);
             return res.render("register.ejs", {
                 error: "Failed to complete registration: " + (err.message || "An unexpected error occurred"),
                 msg: null,
-                formData: req.body || {}
+                formData: req.body || {},
+                returnTo: req.body.returnTo || null
             });
         }
     },
 
     loginPage: (req, res) => {
+        const returnTo = req.query.returnTo || null;
         if (req.session && req.session.user) {
-            if (req.session.role === "admin") return res.redirect("/");
-            if (req.session.role === "staff") return res.redirect("/staff/portal");
-            return res.redirect("/profile");
+            if (req.session.role === "admin") return res.redirect(returnTo || "/");
+            if (req.session.role === "staff") return res.redirect(returnTo || "/staff/portal");
+            return res.redirect(returnTo || "/profile");
         }
         const error = req.query.error || null;
         const msg = req.query.msg || null;
-        res.render("login.ejs", { error, msg });
+        res.render("login.ejs", { error, msg, returnTo });
     },
 
     login: async (req, res) => {
         try {
             await connectDB();
-            const { email, password } = req.body;
+            const { email, password, returnTo } = req.body;
             const inputEmail = (email || "").trim().toLowerCase();
             const inputPassword = (password || "").trim();
 
             if (!inputEmail || !inputPassword) {
                 return res.render("login.ejs", {
                     error: "Please enter both email and password.",
-                    msg: null
+                    msg: null,
+                    returnTo
                 });
             }
 
@@ -155,7 +168,7 @@ const authController = {
                 req.session.role = "admin";
                 req.session.adminEmail = adminEmail;
                 req.session.user = { name: "Society Admin", email: adminEmail, role: "admin" };
-                return res.redirect("/?msg=" + encodeURIComponent("Welcome back, Admin!"));
+                return res.redirect((returnTo || "/") + "?msg=" + encodeURIComponent("Welcome back, Admin!"));
             }
 
             // 2. Check Maintenance Staff Credentials
@@ -172,7 +185,7 @@ const authController = {
                         staffId: staffMember.staffId,
                         role: "staff" 
                     };
-                    return res.redirect("/staff/portal?msg=" + encodeURIComponent(`Welcome back, ${staffMember.name}!`));
+                    return res.redirect((returnTo || "/staff/portal") + "?msg=" + encodeURIComponent(`Welcome back, ${staffMember.name}!`));
                 }
             }
 
@@ -191,20 +204,24 @@ const authController = {
                         flatNo: user.flatNo,
                         phone: user.phone
                     };
-                    return res.redirect("/profile?msg=" + encodeURIComponent(`Welcome back, ${user.name}!`));
+                    const target = returnTo || "/profile";
+                    const delim = target.includes("?") ? "&" : "?";
+                    return res.redirect(`${target}${delim}msg=` + encodeURIComponent(`Welcome back, ${user.name}!`));
                 }
             }
 
             // 4. Invalid credentials
             return res.render("login.ejs", {
                 error: "Invalid email or password. Please check your credentials or register for an account.",
-                msg: null
+                msg: null,
+                returnTo
             });
         } catch (err) {
             console.error("Login error:", err.message || err);
             return res.render("login.ejs", {
                 error: "An unexpected error occurred during login. Please try again.",
-                msg: null
+                msg: null,
+                returnTo: req.body.returnTo || null
             });
         }
     },
@@ -214,7 +231,7 @@ const authController = {
             await connectDB();
             const sessionUser = req.session.user;
             if (!sessionUser) {
-                return res.redirect("/login?msg=" + encodeURIComponent("Please login to view your profile."));
+                return res.redirect("/login?msg=" + encodeURIComponent("Please login to view your profile.") + "&returnTo=/profile");
             }
 
             // If Admin
@@ -227,10 +244,17 @@ const authController = {
                 return res.redirect("/staff/portal");
             }
 
-            // Resident Profile - fetch user details and their filed complaints
+            // Resident Profile - fetch user details and their filed complaints (by userId OR email)
+            const queryFilter = {
+                $or: [
+                    { userId: sessionUser.id },
+                    { email: sessionUser.email.toLowerCase() }
+                ]
+            };
+
             const [userData, userComplaints] = await Promise.all([
                 User.findById(sessionUser.id).lean().catch(() => sessionUser),
-                Complaints.find({ email: sessionUser.email.toLowerCase() }).sort({ createdAt: -1 }).lean().catch(() => [])
+                Complaints.find(queryFilter).sort({ createdAt: -1 }).lean().catch(() => [])
             ]);
 
             const currentUser = userData || sessionUser;
@@ -258,6 +282,7 @@ const authController = {
             res.redirect("/?msg=" + encodeURIComponent("Unable to load profile."));
         }
     },
+
 
     logout: (req, res) => {
         req.session.destroy((err) => {

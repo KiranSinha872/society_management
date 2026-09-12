@@ -167,6 +167,8 @@
     <% } %>
 
     <form id="loginForm" action="/login" method="post" onsubmit="handleLoginSubmit(event)">
+        <input type="hidden" name="returnTo" value="<%= (typeof returnTo !== 'undefined' && returnTo) ? returnTo : '' %>">
+
         <div class="form-group">
             <label>Registered Email</label>
             <input type="email" name="email" required placeholder="your email address...">
@@ -181,7 +183,7 @@
     </form>
 
     <div style="margin-top: 18px; font-size: 13.5px; color: #64748b;">
-        Resident without an account? <a href="/register" style="color: #2563eb; font-weight: 600; text-decoration: none;">Register here</a>
+        Resident without an account? <a href="/register<%= (typeof returnTo !== 'undefined' && returnTo) ? '?returnTo=' + encodeURIComponent(returnTo) : '' %>" style="color: #2563eb; font-weight: 600; text-decoration: none;">Register here</a>
     </div>
 
     <div class="info-box">
@@ -193,6 +195,7 @@
 
     <a class="back-link" href="/">← Return to Public Dashboard</a>
 </div>
+
 
 <script>
     function handleLoginSubmit() {

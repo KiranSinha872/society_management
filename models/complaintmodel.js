@@ -94,6 +94,12 @@ const complaintmodel = new mongoose.Schema({
         default: ""
     },
 
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        default: null
+    },
+
     timeline: [
         {
             status: String,
@@ -110,6 +116,7 @@ const complaintmodel = new mongoose.Schema({
 });
 
 // Production Indexes for high-speed queries & dashboard aggregation
+complaintmodel.index({ userId: 1 });
 complaintmodel.index({ status: 1 });
 complaintmodel.index({ category: 1, status: 1 });
 complaintmodel.index({ wing: 1, status: 1 });
@@ -119,4 +126,5 @@ complaintmodel.index({ createdAt: -1 });
 complaintmodel.index({ updatedAt: -1 });
 
 module.exports = mongoose.model("complaint", complaintmodel);
+
 

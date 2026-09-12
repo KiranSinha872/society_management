@@ -2,8 +2,11 @@ const isAuthenticated = (req, res, next) => {
     if (req.session && (req.session.user || req.session.role)) {
         return next();
     }
-    return res.redirect("/login?msg=" + encodeURIComponent("Please login to access this page."));
+    const returnTo = encodeURIComponent(req.originalUrl || "/add");
+    const msg = encodeURIComponent("Please log in or register an account to file and track maintenance complaints.");
+    return res.redirect(`/login?msg=${msg}&returnTo=${returnTo}`);
 };
+
 
 const isAdmin = (req, res, next) => {
     if (req.session && req.session.role === "admin") {

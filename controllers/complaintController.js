@@ -244,6 +244,19 @@ const complaintController = {
     adddata: async (req, res) => {
         try {
             await connectDB();
+
+            if (!req.session || (!req.session.user && req.session.role !== "admin" && req.session.role !== "staff")) {
+                return res.redirect("/login?msg=" + encodeURIComponent("Please log in or register to submit a maintenance complaint.") + "&returnTo=/add");
+            }
+
+            const currentUser = req.session.user || {};
+            req.body.userId = currentUser.id || null;
+            if (!req.body.residentName && currentUser.name) req.body.residentName = currentUser.name;
+            if (!req.body.email && currentUser.email) req.body.email = currentUser.email;
+            if (!req.body.phone && currentUser.phone) req.body.phone = currentUser.phone;
+            if (!req.body.wing && currentUser.wing) req.body.wing = currentUser.wing;
+            if (!req.body.flatNo && currentUser.flatNo) req.body.flatNo = currentUser.flatNo;
+
             if (!req.body.complaintId || req.body.complaintId.trim() === "") {
                 const count = await Complaints.countDocuments().catch(() => 0);
                 req.body.complaintId = "CMP-" + String(1001 + count);
@@ -252,7 +265,7 @@ const complaintController = {
             req.body.timeline = [
                 {
                     status: req.body.status || "Pending",
-                    note: "Complaint registered by resident.",
+                    note: "Complaint registered by " + (req.body.residentName || "resident") + ".",
                     updatedAt: new Date()
                 }
             ];
@@ -267,12 +280,19 @@ const complaintController = {
             }
 
             await Complaints.create(req.body);
+
+            // If resident user, redirect to their profile to view the submitted complaint
+            if (req.session.role === "resident") {
+                return res.redirect("/profile?msg=" + encodeURIComponent(`Complaint #${req.body.complaintId} submitted successfully! Track progress below.`));
+            }
+
             res.redirect("/view?msg=" + encodeURIComponent(`Complaint #${req.body.complaintId} submitted successfully!`));
         } catch (err) {
             console.error("Error adding complaint:", err);
             res.redirect("/view?msg=" + encodeURIComponent("Error registering complaint: " + err.message));
         }
     },
+
 
     editpage: async (req, res) => {
         try {
