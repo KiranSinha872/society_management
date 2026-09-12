@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Staff - <%= staff.name %></title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 28px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0f172a;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13.5px;
+            outline: none;
+            background: #f8fafc;
+            color: #1e293b;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 11px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: #059669;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        a {
+            display: inline-block;
+            margin: 0 8px;
+            text-decoration: none;
+            color: #2563eb;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>✏️ Edit Staff Details</h1>
+    <div class="subtitle"><%= staff.staffId %> - <%= staff.specialty %></div>
+
+    <form action="/staff/edit/<%= staff._id %>" method="post">
+
+        <div class="form-group">
+            <label>Staff Full Name *</label>
+            <input type="text" name="name" value="<%= staff.name %>" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Specialty / Skill *</label>
+                <select name="specialty" required>
+                    <option value="Plumber" <%= staff.specialty === 'Plumber' ? 'selected' : '' %>>Plumber</option>
+                    <option value="Electrician" <%= staff.specialty === 'Electrician' ? 'selected' : '' %>>Electrician</option>
+                    <option value="Lift Technician" <%= staff.specialty === 'Lift Technician' ? 'selected' : '' %>>Lift Technician</option>
+                    <option value="Security Guard" <%= staff.specialty === 'Security Guard' ? 'selected' : '' %>>Security Guard</option>
+                    <option value="Carpenter" <%= staff.specialty === 'Carpenter' ? 'selected' : '' %>>Carpenter</option>
+                    <option value="Housekeeping" <%= staff.specialty === 'Housekeeping' ? 'selected' : '' %>>Housekeeping</option>
+                    <option value="Gardener" <%= staff.specialty === 'Gardener' ? 'selected' : '' %>>Gardener</option>
+                    <option value="General Maintenance" <%= staff.specialty === 'General Maintenance' ? 'selected' : '' %>>General Maintenance</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Availability Status *</label>
+                <select name="availability" required>
+                    <option value="Available" <%= staff.availability === 'Available' ? 'selected' : '' %>>Available</option>
+                    <option value="On Duty" <%= staff.availability === 'On Duty' ? 'selected' : '' %>>On Duty</option>
+                    <option value="On Leave" <%= staff.availability === 'On Leave' ? 'selected' : '' %>>On Leave</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" name="phone" value="<%= staff.phone %>" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Email Address *</label>
+                <input type="email" name="email" value="<%= staff.email %>" required>
+            </div>
+
+            <div class="form-group">
+                <label>Portal Password *</label>
+                <input type="password" name="password" value="<%= staff.password %>" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Working Shift / Hours</label>
+            <input type="text" name="shift" value="<%= staff.shift %>">
+        </div>
+
+        <button type="submit">💾 Save Changes</button>
+
+    </form>
+
+    <div class="nav-links">
+        <a href="/staff/view">👷 View Staff</a>
+        <a href="/">🏠 Home Dashboard</a>
+    </div>
+
+</div>
+
+</body>
+</html>

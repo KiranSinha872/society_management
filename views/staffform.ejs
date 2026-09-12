@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Maintenance Staff - Admin Portal</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 28px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0f172a;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13.5px;
+            outline: none;
+            background: #f8fafc;
+            color: #1e293b;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 11px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        a {
+            display: inline-block;
+            margin: 0 8px;
+            text-decoration: none;
+            color: #2563eb;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .note {
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>👷 Add Maintenance Staff</h1>
+    <p class="subtitle">Onboard an electrician, plumber, technician or security personnel</p>
+
+    <div class="note">
+        🔑 <strong>Access Note:</strong> This staff member will be able to log in to the <strong>Staff Portal</strong> using their registered email and password.
+    </div>
+
+    <form action="/staff/add" method="post">
+
+        <div class="form-group">
+            <label>Staff Full Name *</label>
+            <input type="text" name="name" placeholder="e.g. Ramesh Kumar" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Specialty / Skill *</label>
+                <select name="specialty" required>
+                    <option value="" disabled selected>Select Role</option>
+                    <option value="Plumber">Plumber</option>
+                    <option value="Electrician">Electrician</option>
+                    <option value="Lift Technician">Lift Technician</option>
+                    <option value="Security Guard">Security Guard</option>
+                    <option value="Carpenter">Carpenter</option>
+                    <option value="Housekeeping">Housekeeping</option>
+                    <option value="Gardener">Gardener</option>
+                    <option value="General Maintenance">General Maintenance</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Availability Status *</label>
+                <select name="availability" required>
+                    <option value="Available" selected>Available</option>
+                    <option value="On Duty">On Duty</option>
+                    <option value="On Leave">On Leave</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" name="phone" placeholder="Contact number" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Staff Login Email *</label>
+                <input type="email" name="email" placeholder="staff@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Login Password *</label>
+                <input type="password" name="password" value="Staff@123" required placeholder="Enter password">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Working Shift / Hours</label>
+            <input type="text" name="shift" value="Day (8 AM - 6 PM)">
+        </div>
+
+        <button type="submit">➕ Register Staff & Grant Login</button>
+
+    </form>
+
+    <div class="nav-links">
+        <a href="/staff/view">👷 View Staff</a>
+        <a href="/">🏠 Home Dashboard</a>
+    </div>
+
+</div>
+
+</body>
+</html>

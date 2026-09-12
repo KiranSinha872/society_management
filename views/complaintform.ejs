@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Complaint - Society Management</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 28px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0f172a;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13.5px;
+            outline: none;
+            background: #f8fafc;
+            color: #1e293b;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 11px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        a {
+            display: inline-block;
+            margin: 0 8px;
+            text-decoration: none;
+            color: #2563eb;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>🛠️ Register Maintenance Complaint</h1>
+    <p class="subtitle">Submit an issue for technician assignment and status tracking</p>
+
+    <form action="/add" method="post">
+
+        <div class="form-group">
+            <label>Complaint Title *</label>
+            <input type="text" name="title" placeholder="e.g. Water Leakage in Bathroom / Lift Stuck" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Resident Full Name *</label>
+                <input type="text" name="residentName" placeholder="Full Name" required>
+            </div>
+            <div class="form-group">
+                <label>Block / Wing *</label>
+                <select name="wing" required>
+                    <option value="" disabled selected>Select Block</option>
+                    <option value="A">Block A</option>
+                    <option value="B">Block B</option>
+                    <option value="C">Block C</option>
+                    <option value="D">Block D</option>
+                    <option value="E">Block E</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Flat Number *</label>
+                <input type="text" name="flatNo" placeholder="e.g. 302 or A-101" required>
+            </div>
+            <div class="form-group">
+                <label>Location / Area</label>
+                <input type="text" name="location" placeholder="e.g. Flat Interior, Corridor, Terrace, Lift Lobby">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Phone Number *</label>
+                <input type="tel" name="phone" placeholder="Mobile Number" required>
+            </div>
+            <div class="form-group">
+                <label>Email Address *</label>
+                <input type="email" name="email" placeholder="name@example.com" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Issue Category *</label>
+                <select name="category" required>
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="Water Supply & Plumbing">Water Supply & Plumbing</option>
+                    <option value="Electricity & Power">Electricity & Power</option>
+                    <option value="Elevator & Lift">Elevator & Lift</option>
+                    <option value="Security & Access">Security & Access</option>
+                    <option value="Carpentry & Civil">Carpentry & Civil</option>
+                    <option value="Cleanliness & Sanitation">Cleanliness & Sanitation</option>
+                    <option value="Parking & Traffic">Parking & Traffic</option>
+                    <option value="Noise Disturbance">Noise Disturbance</option>
+                    <option value="Common Amenities & Garden">Common Amenities & Garden</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Priority Level *</label>
+                <select name="priority" required>
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Assign Maintenance Staff (Optional)</label>
+            <select name="assignedStaff">
+                <option value="Unassigned" selected>Unassigned (Assign later)</option>
+                <% if (typeof staffList !== 'undefined' && staffList.length > 0) { %>
+                    <% staffList.forEach(s => { %>
+                        <option value="<%= s.name %> (<%= s.specialty %>)">
+                            <%= s.name %> — <%= s.specialty %> (<%= s.availability %>)
+                        </option>
+                    <% }) %>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Image / Photo Attachment URL (Optional)</label>
+            <input type="url" name="imageUrl" placeholder="https://example.com/photo.jpg">
+        </div>
+
+        <div class="form-group">
+            <label>Detailed Problem Description *</label>
+            <textarea name="description" placeholder="Provide complete details about the issue, urgency, location, or access instructions..." rows="3" required></textarea>
+        </div>
+
+        <button type="submit">➕ Submit Complaint Ticket</button>
+
+    </form>
+
+    <div class="nav-links">
+        <a href="/view">📋 View Complaints</a>
+        <a href="/">🏠 Home Dashboard</a>
+    </div>
+
+</div>
+
+</body>
+</html>

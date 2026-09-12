@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Society Residents Directory</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            padding-bottom: 50px;
+        }
+
+        .auth-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            max-width: 900px;
+            margin: 10px auto 0;
+            padding: 0 15px;
+            font-size: 13px;
+        }
+
+        .auth-badge {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .auth-link {
+            text-decoration: none;
+            color: #ef4444;
+            font-weight: 600;
+            padding: 4px 10px;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            background: white;
+        }
+
+        .login-btn-top {
+            text-decoration: none;
+            color: #0f172a;
+            font-weight: 600;
+            padding: 5px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: white;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header h1 {
+            color: #0f172a;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px auto 10px;
+            flex-wrap: wrap;
+            max-width: 900px;
+            padding: 0 15px;
+        }
+
+        .btn {
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* Filter bar */
+        .filter-box {
+            max-width: 900px;
+            margin: 15px auto 25px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .filter-inputs input, .filter-inputs select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            background: #f8fafc;
+        }
+
+        .filter-inputs input:focus, .filter-inputs select:focus {
+            border-color: #2563eb;
+            background: white;
+        }
+
+        .filter-btn {
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .filter-btn:hover {
+            background: #334155;
+        }
+
+        /* Grid */
+        .grid-container {
+            max-width: 960px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 20px;
+            padding: 0 15px;
+        }
+
+        @media (max-width: 480px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 10px;
+        }
+
+        .resident-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .t-Owner { background: #dcfce7; color: #15803d; }
+        .t-Tenant { background: #e0f2fe; color: #0369a1; }
+
+        .card-body p {
+            margin: 6px 0;
+            font-size: 13.5px;
+            color: #334155;
+            line-height: 1.4;
+        }
+
+        .card-body span {
+            font-weight: 600;
+            color: #475569;
+            display: inline-block;
+            min-width: 125px;
+        }
+
+        .card-actions {
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit {
+            text-decoration: none;
+            background: #10b981;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .edit:hover {
+            background: #059669;
+        }
+
+        .delete {
+            text-decoration: none;
+            background: #ef4444;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .delete:hover {
+            background: #dc2626;
+        }
+
+        .empty-state {
+            text-align: center;
+            background: white;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 40px 20px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .empty-state h3 {
+            color: #475569;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .home-link {
+            display: block;
+            text-align: center;
+            margin: 35px auto 0;
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .home-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-bar">
+        <% if (isAdmin) { %>
+            <div class="auth-badge">🛡️ Admin: <%= adminEmail %></div>
+            <a class="auth-link" href="/logout">🚪 Logout</a>
+        <% } else { %>
+            <a class="login-btn-top" href="/login">🔐 Admin Login</a>
+        <% } %>
+    </div>
+
+    <div class="header">
+        <h1>👥 Society Residents Directory</h1>
+    </div>
+
+    <div class="top-nav">
+        <% if (isAdmin) { %>
+            <a class="btn" href="/residents/add">➕ Register New Resident</a>
+        <% } %>
+        <a class="btn btn-outline" href="/view">🛠️ Complaints Records</a>
+        <a class="btn btn-outline" href="/">🏠 Dashboard Home</a>
+    </div>
+
+    <div class="filter-box">
+        <form class="filter-form" action="/residents/view" method="get">
+            <div class="filter-inputs">
+                <input type="text" name="search" placeholder="Search by name, flat, email..." value="<%= (typeof filter !== 'undefined' && filter.search) ? filter.search : '' %>">
+                
+                <select name="wing">
+                    <option value="All">All Wings</option>
+                    <option value="A" <%= (typeof filter !== 'undefined' && filter.wing === 'A') ? 'selected' : '' %>>Wing A</option>
+                    <option value="B" <%= (typeof filter !== 'undefined' && filter.wing === 'B') ? 'selected' : '' %>>Wing B</option>
+                    <option value="C" <%= (typeof filter !== 'undefined' && filter.wing === 'C') ? 'selected' : '' %>>Wing C</option>
+                    <option value="D" <%= (typeof filter !== 'undefined' && filter.wing === 'D') ? 'selected' : '' %>>Wing D</option>
+                    <option value="E" <%= (typeof filter !== 'undefined' && filter.wing === 'E') ? 'selected' : '' %>>Wing E</option>
+                </select>
+
+                <select name="residentType">
+                    <option value="All">All Types</option>
+                    <option value="Owner" <%= (typeof filter !== 'undefined' && filter.residentType === 'Owner') ? 'selected' : '' %>>Owner</option>
+                    <option value="Tenant" <%= (typeof filter !== 'undefined' && filter.residentType === 'Tenant') ? 'selected' : '' %>>Tenant</option>
+                </select>
+            </div>
+            <button class="filter-btn" type="submit">Filter Residents</button>
+        </form>
+    </div>
+
+    <% if (resident.length === 0) { %>
+        <div class="empty-state">
+            <div style="font-size: 40px; margin-bottom: 10px;">🏢</div>
+            <h3>No Residents Found</h3>
+            <p>No registered society members match the current filter.</p>
+            <% if (isAdmin) { %>
+                <a class="btn" href="/residents/add">➕ Add First Resident</a>
+            <% } %>
+        </div>
+    <% } else { %>
+        <div class="grid-container">
+            <% resident.forEach((elem) => { %>
+                <div class="card">
+                    <div>
+                        <div class="card-header">
+                            <div class="resident-name">👤 <%= elem.name %></div>
+                            <span class="badge t-<%= elem.residentType %>"><%= elem.residentType %></span>
+                        </div>
+
+                        <div class="card-body">
+                            <p><span>Flat / Wing :</span> Wing <%= elem.wing %> - Flat <%= elem.flatNo %></p>
+                            <p><span>Floor :</span> <%= elem.floor %></p>
+                            <p><span>Email :</span> <%= elem.email %></p>
+                            <p><span>Phone :</span> <%= elem.phone %></p>
+                            <p><span>Emergency Contact :</span> <%= elem.emergencyContact %></p>
+                            <p><span>Family Members :</span> <%= elem.membersCount %></p>
+                            <p><span>Registered Vehicle :</span> <%= elem.vehicleNo || 'None' %></p>
+                            <% if (elem.ownershipSince) { %>
+                                <p><span>Residing Since :</span> <%= elem.ownershipSince %></p>
+                            <% } %>
+                            <p style="font-size: 11.5px; color: #94a3b8; margin-top: 8px;">
+                                Registered on: <%= new Date(elem.createdAt).toLocaleDateString() %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <% if (isAdmin) { %>
+                        <div class="card-actions">
+                            <a class="edit" href="/residents/edit/<%= elem._id %>">✏️ Edit</a>
+                            <a class="delete" href="/residents/delete/<%= elem._id %>" onclick="return confirm('Are you sure you want to delete this resident record?');">🗑 Delete</a>
+                        </div>
+                    <% } %>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <a class="home-link" href="/">🏠 Back to Dashboard</a>
+
+</body>
+</html>

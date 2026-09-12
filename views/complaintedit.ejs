@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Complaint - <%= complaint.complaintId %></title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            padding: 30px 15px 60px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            background: white;
+            padding: 28px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0f172a;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .ticket-id {
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13.5px;
+            outline: none;
+            background: #f8fafc;
+            color: #1e293b;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 11px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: #059669;
+        }
+
+        /* Timeline Box */
+        .timeline-box {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .timeline-box h3 {
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .timeline-list {
+            list-style: none;
+            border-left: 2px solid #e2e8f0;
+            margin-left: 8px;
+            padding-left: 12px;
+        }
+
+        .timeline-item {
+            margin-bottom: 10px;
+            font-size: 12px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -17px;
+            top: 4px;
+            width: 8px;
+            height: 8px;
+            background: #2563eb;
+            border-radius: 50%;
+        }
+
+        .timeline-status {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .timeline-time {
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        .timeline-note {
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        a {
+            display: inline-block;
+            margin: 0 8px;
+            text-decoration: none;
+            color: #2563eb;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>✏️ Update Complaint Ticket</h1>
+    <div class="ticket-id">Ticket ID: <strong><%= complaint.complaintId %></strong></div>
+
+    <form action="/edit/<%= complaint._id %>" method="post">
+
+        <div class="form-group">
+            <label>Complaint Title *</label>
+            <input type="text" name="title" value="<%= complaint.title %>" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Resident Full Name *</label>
+                <input type="text" name="residentName" value="<%= complaint.residentName %>" required>
+            </div>
+            <div class="form-group">
+                <label>Block / Wing *</label>
+                <select name="wing" required>
+                    <option value="A" <%= complaint.wing === 'A' ? 'selected' : '' %>>Block A</option>
+                    <option value="B" <%= complaint.wing === 'B' ? 'selected' : '' %>>Block B</option>
+                    <option value="C" <%= complaint.wing === 'C' ? 'selected' : '' %>>Block C</option>
+                    <option value="D" <%= complaint.wing === 'D' ? 'selected' : '' %>>Block D</option>
+                    <option value="E" <%= complaint.wing === 'E' ? 'selected' : '' %>>Block E</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Flat Number *</label>
+                <input type="text" name="flatNo" value="<%= complaint.flatNo %>" required>
+            </div>
+            <div class="form-group">
+                <label>Location / Area</label>
+                <input type="text" name="location" value="<%= complaint.location || '' %>">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Phone Number *</label>
+                <input type="tel" name="phone" value="<%= complaint.phone %>" required>
+            </div>
+            <div class="form-group">
+                <label>Email Address *</label>
+                <input type="email" name="email" value="<%= complaint.email %>" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Issue Category *</label>
+                <select name="category" required>
+                    <option value="Water Supply & Plumbing" <%= complaint.category === 'Water Supply & Plumbing' ? 'selected' : '' %>>Water Supply & Plumbing</option>
+                    <option value="Electricity & Power" <%= complaint.category === 'Electricity & Power' ? 'selected' : '' %>>Electricity & Power</option>
+                    <option value="Elevator & Lift" <%= complaint.category === 'Elevator & Lift' ? 'selected' : '' %>>Elevator & Lift</option>
+                    <option value="Security & Access" <%= complaint.category === 'Security & Access' ? 'selected' : '' %>>Security & Access</option>
+                    <option value="Carpentry & Civil" <%= complaint.category === 'Carpentry & Civil' ? 'selected' : '' %>>Carpentry & Civil</option>
+                    <option value="Cleanliness & Sanitation" <%= complaint.category === 'Cleanliness & Sanitation' ? 'selected' : '' %>>Cleanliness & Sanitation</option>
+                    <option value="Parking & Traffic" <%= complaint.category === 'Parking & Traffic' ? 'selected' : '' %>>Parking & Traffic</option>
+                    <option value="Noise Disturbance" <%= complaint.category === 'Noise Disturbance' ? 'selected' : '' %>>Noise Disturbance</option>
+                    <option value="Common Amenities & Garden" <%= complaint.category === 'Common Amenities & Garden' ? 'selected' : '' %>>Common Amenities & Garden</option>
+                    <option value="Other" <%= complaint.category === 'Other' ? 'selected' : '' %>>Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Priority Level *</label>
+                <select name="priority" required>
+                    <option value="Low" <%= complaint.priority === 'Low' ? 'selected' : '' %>>Low</option>
+                    <option value="Medium" <%= complaint.priority === 'Medium' ? 'selected' : '' %>>Medium</option>
+                    <option value="High" <%= complaint.priority === 'High' ? 'selected' : '' %>>High</option>
+                    <option value="Critical" <%= complaint.priority === 'Critical' ? 'selected' : '' %>>Critical</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Workflow Status *</label>
+                <select name="status" required>
+                    <option value="Pending" <%= complaint.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="Assigned" <%= complaint.status === 'Assigned' ? 'selected' : '' %>>Assigned</option>
+                    <option value="In Progress" <%= complaint.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+                    <option value="Resolved" <%= complaint.status === 'Resolved' ? 'selected' : '' %>>Resolved</option>
+                    <option value="Rejected" <%= complaint.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Assigned Staff</label>
+                <select name="assignedStaff">
+                    <option value="Unassigned" <%= !complaint.assignedStaff || complaint.assignedStaff === 'Unassigned' ? 'selected' : '' %>>Unassigned</option>
+                    <% if (typeof staffList !== 'undefined' && staffList.length > 0) { %>
+                        <% staffList.forEach(s => { %>
+                            <option value="<%= s.name %> (<%= s.specialty %>)" <%= complaint.assignedStaff && complaint.assignedStaff.includes(s.name) ? 'selected' : '' %>>
+                                <%= s.name %> — <%= s.specialty %> (<%= s.availability %>)
+                            </option>
+                        <% }) %>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Image Attachment URL</label>
+            <input type="url" name="imageUrl" value="<%= complaint.imageUrl || '' %>" placeholder="https://example.com/photo.jpg">
+        </div>
+
+        <div class="form-group">
+            <label>Problem Description *</label>
+            <textarea name="description" rows="3" required><%= complaint.description %></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Resolution Notes / Technician Comments</label>
+            <textarea name="resolutionNotes" placeholder="Enter resolution notes, parts replaced, or closing comments..." rows="2"><%= complaint.resolutionNotes || '' %></textarea>
+        </div>
+
+        <button type="submit">💾 Save & Update Ticket</button>
+
+    </form>
+
+    <!-- Timeline Updates History -->
+    <% if (complaint.timeline && complaint.timeline.length > 0) { %>
+    <div class="timeline-box">
+        <h3>📜 Status Change Log</h3>
+        <ul class="timeline-list">
+            <% complaint.timeline.forEach(event => { %>
+                <li class="timeline-item">
+                    <span class="timeline-status"><%= event.status %></span> — 
+                    <span class="timeline-time"><%= new Date(event.updatedAt).toLocaleString() %></span>
+                    <% if (event.note) { %>
+                        <div class="timeline-note"><%= event.note %></div>
+                    <% } %>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+    <% } %>
+
+    <div class="nav-links">
+        <a href="/view">📋 View Complaints</a>
+        <a href="/">🏠 Home Dashboard</a>
+    </div>
+
+</div>
+
+</body>
+</html>

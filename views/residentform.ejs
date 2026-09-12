@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Resident - Society Management</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            padding: 28px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0f172a;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13.5px;
+            outline: none;
+            background: #f8fafc;
+            color: #1e293b;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 11px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        a {
+            display: inline-block;
+            margin: 0 8px;
+            text-decoration: none;
+            color: #2563eb;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>👥 Register Society Member</h1>
+    <p class="subtitle">Add a new apartment resident or owner into the directory</p>
+
+    <form action="/residents/add" method="post">
+
+        <div class="form-group">
+            <label>Resident Full Name *</label>
+            <input type="text" name="name" placeholder="e.g. Rahul Sharma" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Wing *</label>
+                <select name="wing" required>
+                    <option value="" disabled selected>Select Wing</option>
+                    <option value="A">Wing A</option>
+                    <option value="B">Wing B</option>
+                    <option value="C">Wing C</option>
+                    <option value="D">Wing D</option>
+                    <option value="E">Wing E</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Flat Number *</label>
+                <input type="text" name="flatNo" placeholder="e.g. 501 or A-501" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Floor Number *</label>
+                <input type="number" name="floor" placeholder="e.g. 5" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label>Resident Type *</label>
+                <select name="residentType" required>
+                    <option value="Owner">Owner</option>
+                    <option value="Tenant">Tenant</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" name="email" placeholder="rahul@example.com" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Primary Phone *</label>
+                <input type="tel" name="phone" placeholder="Contact number" required>
+            </div>
+
+            <div class="form-group">
+                <label>Emergency Contact *</label>
+                <input type="tel" name="emergencyContact" placeholder="Emergency number" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Family Members Count *</label>
+                <input type="number" name="membersCount" placeholder="e.g. 4" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label>Vehicle Number (Optional)</label>
+                <input type="text" name="vehicleNo" placeholder="e.g. MH-02-AB-1234">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Residing Since (Year / Month)</label>
+            <input type="text" name="ownershipSince" placeholder="e.g. Jan 2022">
+        </div>
+
+        <button type="submit">➕ Add Resident to Directory</button>
+
+    </form>
+
+    <div class="nav-links">
+        <a href="/residents/view">🏢 View Directory</a>
+        <a href="/">🏠 Home Dashboard</a>
+    </div>
+
+</div>
+
+</body>
+</html>
