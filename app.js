@@ -57,8 +57,11 @@ const mongoose = require("mongoose");
 // Diagnostic Health Route
 app.get("/health", async (req, res) => {
     try {
-        const hasMongoUrl = !!process.env.MONGO_URL;
-        const hasMongoDbUri = !!process.env.MONGODB_URI;
+        const mongoKey = process.env.MONGO_URL ? "MONGO_URL" :
+                         process.env.MONGODB_URI ? "MONGODB_URI" :
+                         process.env.DATABASE_URL ? "DATABASE_URL" :
+                         process.env.MONGODB_URL ? "MONGODB_URL" : null;
+
         let connErr = null;
         try {
             await connectDB();
@@ -70,13 +73,15 @@ app.get("/health", async (req, res) => {
         res.json({
             status: state === 1 ? "healthy" : "degraded",
             dbState: stateLabels[state] || state,
-            hasEnv: { MONGO_URL: hasMongoUrl, MONGODB_URI: hasMongoDbUri },
+            detectedMongoEnvVar: mongoKey,
+            configuredEnvKeys: Object.keys(process.env).filter(k => !k.includes("SECRET") && !k.includes("PASS") && !k.startsWith("npm_") && !k.startsWith("VERCEL_") && !k.startsWith("AWS_")),
             connectionError: connErr
         });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
+
 
 // Routes
 const authRoutes = require("./routes/authroutes");

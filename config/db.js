@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const mongoose = require("mongoose");
 
-const mongoUrl = process.env.MONGO_URL || process.env.MONGODB_URI;
+const mongoUrl = process.env.MONGO_URL || process.env.MONGODB_URI || process.env.DATABASE_URL || process.env.MONGODB_URL;
 
 // Global cached connection for Serverless (Vercel) & Local
 let cached = global.mongoose;
