@@ -13,8 +13,10 @@ router.get("/login", authController.loginPage);
 router.post("/login", authController.login);
 router.get("/logout", authController.logout);
 
-// Protected User Profile
+// Protected User Profile & My Complaints
 router.get("/profile", isAuthenticated, authController.profilePage);
+router.get("/my-complaints", isAuthenticated, (req, res) => res.redirect("/profile"));
+router.post("/change-password", isAuthenticated, authController.changePassword);
 
 module.exports = router;
 

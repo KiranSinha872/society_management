@@ -10,6 +10,7 @@ router.get("/", staffController.home);
 // Dedicated Staff Workspace Portal (Staff only)
 router.get("/portal", isStaff, staffController.portal);
 router.post("/availability", isStaff, staffController.updateAvailability);
+router.post("/change-password", isStaff, staffController.changePassword);
 
 // View Staff Directory
 router.get("/view", staffController.getdata);

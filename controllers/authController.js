@@ -174,7 +174,20 @@ const authController = {
             // 2. Check Maintenance Staff Credentials
             const staffMember = await Staff.findOne({ email: inputEmail });
             if (staffMember) {
-                if (staffMember.password === inputPassword) {
+                let isStaffMatch = false;
+                if (staffMember.password.startsWith("$2a$") || staffMember.password.startsWith("$2b$")) {
+                    isStaffMatch = await bcrypt.compare(inputPassword, staffMember.password);
+                } else {
+                    isStaffMatch = (staffMember.password === inputPassword);
+                    // Upgrade legacy plaintext staff password to bcrypt hash
+                    if (isStaffMatch) {
+                        const upgradedHash = await bcrypt.hash(inputPassword, 10);
+                        await Staff.findByIdAndUpdate(staffMember._id, { password: upgradedHash });
+                        staffMember.password = upgradedHash;
+                    }
+                }
+
+                if (isStaffMatch) {
                     req.session.role = "staff";
                     req.session.staffUser = staffMember;
                     req.session.user = { 
@@ -265,6 +278,7 @@ const authController = {
             const inProgressCount = userComplaints.filter(c => c.status === "In Progress").length;
 
             const msg = req.query.msg || null;
+            const error = req.query.error || null;
 
             res.render("profile.ejs", {
                 user: currentUser,
@@ -275,7 +289,8 @@ const authController = {
                     pendingCount,
                     inProgressCount
                 },
-                msg
+                msg,
+                error
             });
         } catch (err) {
             console.error("Profile page error:", err.message || err);
@@ -283,6 +298,51 @@ const authController = {
         }
     },
 
+    changePassword: async (req, res) => {
+        try {
+            await connectDB();
+            const sessionUser = req.session.user;
+            if (!sessionUser) {
+                return res.redirect("/login?msg=" + encodeURIComponent("Please log in to change your password."));
+            }
+
+            const { currentPassword, newPassword, confirmPassword } = req.body;
+            const trimmedCurrent = (currentPassword || "").trim();
+            const trimmedNew = (newPassword || "").trim();
+            const trimmedConfirm = (confirmPassword || "").trim();
+
+            if (!trimmedCurrent || !trimmedNew || !trimmedConfirm) {
+                return res.redirect("/profile?error=" + encodeURIComponent("All password fields are required."));
+            }
+
+            if (trimmedNew.length < 6) {
+                return res.redirect("/profile?error=" + encodeURIComponent("New password must be at least 6 characters long."));
+            }
+
+            if (trimmedNew !== trimmedConfirm) {
+                return res.redirect("/profile?error=" + encodeURIComponent("New passwords do not match. Please re-enter both."));
+            }
+
+            const user = await User.findById(sessionUser.id);
+            if (!user) {
+                return res.redirect("/login?msg=" + encodeURIComponent("User account not found. Please log in again."));
+            }
+
+            const isCurrentMatch = await bcrypt.compare(trimmedCurrent, user.password);
+            if (!isCurrentMatch) {
+                return res.redirect("/profile?error=" + encodeURIComponent("Current password is incorrect. Please try again."));
+            }
+
+            const hashedNewPassword = await bcrypt.hash(trimmedNew, 10);
+            user.password = hashedNewPassword;
+            await user.save();
+
+            return res.redirect("/profile?msg=" + encodeURIComponent("Your password has been changed successfully!"));
+        } catch (err) {
+            console.error("User change password error:", err);
+            return res.redirect("/profile?error=" + encodeURIComponent("Failed to change password: " + (err.message || "Server error")));
+        }
+    },
 
     logout: (req, res) => {
         req.session.destroy((err) => {

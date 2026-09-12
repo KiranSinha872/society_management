@@ -395,32 +395,39 @@
 
 <div class="main-wrapper">
 
-    <!-- Top Auth Bar -->
-    <div class="auth-bar">
-        <% if (isAdmin) { %>
-            <div class="auth-badge">
-                <span>🛡️</span>
-                <span>Admin: <%= adminEmail %></span>
-            </div>
-            <a class="auth-link" href="/logout">🚪 Logout</a>
-        <% } else if (isStaff && staffUser) { %>
-            <div class="staff-badge">
-                <span>👷</span>
-                <span>Staff: <%= staffUser.name %> (<%= staffUser.specialty %>)</span>
-            </div>
-            <a class="portal-btn" href="/staff/portal">📋 My Workspace</a>
-            <a class="auth-link" href="/logout">🚪 Logout</a>
-        <% } else if (isResident && currentUser) { %>
-            <div class="resident-badge">
-                <span>👤</span>
-                <span><%= currentUser.name %> <% if (currentUser.wing && currentUser.flatNo) { %>(W-<%= currentUser.wing %>-<%= currentUser.flatNo %>)<% } %></span>
-            </div>
-            <a class="portal-btn" href="/profile">📑 My Profile</a>
-            <a class="auth-link" href="/logout">🚪 Logout</a>
-        <% } else { %>
-            <a class="login-btn-top" href="/login">🔐 Login</a>
-            <a class="btn-register-top" href="/register">📝 Register</a>
-        <% } %>
+    <!-- Top Auth Navigation Bar -->
+    <div class="auth-bar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 18px; padding: 10px 14px; background: white; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div style="font-weight: 700; font-size: 15px; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+            <span>🏢</span> Society Portal
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+            <% if (isAdmin) { %>
+                <div class="auth-badge"><span>🛡️</span> Admin: <%= adminEmail %></div>
+                <a class="portal-btn" href="/">🏠 Admin Dashboard</a>
+                <a class="portal-btn" href="/view">📋 Complaints</a>
+                <a class="portal-btn" href="/residents/view">👥 Users</a>
+                <a class="portal-btn" href="/staff/view">👷 Staff</a>
+                <a class="auth-link" href="/logout">🚪 Logout</a>
+            <% } else if (isStaff && staffUser) { %>
+                <div class="staff-badge"><span>👷</span> Staff: <%= staffUser.name %> (<%= staffUser.specialty %>)</div>
+                <a class="portal-btn" href="/staff/portal">🏠 Staff Dashboard</a>
+                <a class="portal-btn" href="/staff/portal">🛠️ Assigned Complaints</a>
+                <a class="portal-btn" href="/staff/portal">👤 Profile</a>
+                <a class="portal-btn" href="/staff/portal">🔑 Change Password</a>
+                <a class="auth-link" href="/logout">🚪 Logout</a>
+            <% } else if (isResident && currentUser) { %>
+                <div class="resident-badge"><span>👤</span> <%= currentUser.name %></div>
+                <a class="portal-btn" href="/">🏠 Dashboard</a>
+                <a class="portal-btn" href="/add">➕ Register Complaint</a>
+                <a class="portal-btn" href="/profile">📑 My Complaints</a>
+                <a class="portal-btn" href="/profile">👤 Profile</a>
+                <a class="auth-link" href="/logout">🚪 Logout</a>
+            <% } else { %>
+                <a class="portal-btn" href="/login?returnTo=/add&msg=<%= encodeURIComponent('Please login or register to register a complaint.') %>">➕ Register Complaint</a>
+                <a class="login-btn-top" href="/login">🔐 Login</a>
+                <a class="btn-register-top" href="/register">📝 Register</a>
+            <% } %>
+        </div>
     </div>
 
 

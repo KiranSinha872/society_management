@@ -319,13 +319,18 @@
         </a>
         <div class="auth-actions">
             <a class="btn-nav btn-home" href="/">🏠 Dashboard</a>
-            <a class="btn-nav btn-home" href="/view">📋 All Complaints</a>
+            <a class="btn-nav btn-home" href="/add">➕ Register Complaint</a>
+            <a class="btn-nav btn-home" href="/profile">📑 My Complaints</a>
             <a class="btn-nav btn-logout" href="/logout">🚪 Logout</a>
         </div>
     </div>
 
     <% if (typeof msg !== 'undefined' && msg) { %>
         <div class="alert-msg">✅ <%= msg %></div>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert-msg" style="background: #fef2f2; color: #b91c1c; border-color: #fca5a5;">⚠️ <%= error %></div>
     <% } %>
 
     <!-- User Profile Card -->
@@ -349,6 +354,36 @@
         <div class="profile-actions">
             <a class="btn-action-primary" href="/add">➕ Register New Complaint</a>
         </div>
+    </div>
+
+    <!-- Self-Service Change Password Card -->
+    <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <h3 style="font-size: 16px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                🔑 Change Account Password
+            </h3>
+            <span style="font-size: 12px; color: #64748b;">Self-service security</span>
+        </div>
+        
+        <form action="/change-password" method="post" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 160px; gap: 12px; align-items: flex-end;">
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">Current Password *</label>
+                <input type="password" name="currentPassword" required placeholder="Enter current password" style="width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">New Password *</label>
+                <input type="password" name="newPassword" required minlength="6" placeholder="Min 6 characters" style="width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">Confirm New Password *</label>
+                <input type="password" name="confirmPassword" required minlength="6" placeholder="Repeat new password" style="width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px;">
+            </div>
+            <div>
+                <button type="submit" style="width: 100%; padding: 9px 12px; background: #0f172a; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    🔒 Update Password
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- User Complaint Metrics -->
