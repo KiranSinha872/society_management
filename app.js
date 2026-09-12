@@ -52,11 +52,38 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+const mongoose = require("mongoose");
+
+// Diagnostic Health Route
+app.get("/health", async (req, res) => {
+    try {
+        const hasMongoUrl = !!process.env.MONGO_URL;
+        const hasMongoDbUri = !!process.env.MONGODB_URI;
+        let connErr = null;
+        try {
+            await connectDB();
+        } catch (err) {
+            connErr = err.message;
+        }
+        const state = mongoose.connection.readyState;
+        const stateLabels = { 0: "disconnected", 1: "connected", 2: "connecting", 3: "disconnecting" };
+        res.json({
+            status: state === 1 ? "healthy" : "degraded",
+            dbState: stateLabels[state] || state,
+            hasEnv: { MONGO_URL: hasMongoUrl, MONGODB_URI: hasMongoDbUri },
+            connectionError: connErr
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Routes
 const authRoutes = require("./routes/authroutes");
 const complaintRoutes = require("./routes/complaintroutes");
 const residentRoutes = require("./routes/residentroutes");
 const staffRoutes = require("./routes/staffroutes");
+
 
 // Auth Routes (Login / Logout)
 app.use("/", authRoutes);
