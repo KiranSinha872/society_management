@@ -4,40 +4,54 @@ const mongoose = require("mongoose");
 
 const mongoUrl = process.env.MONGO_URL || process.env.MONGODB_URI;
 
-const connectDB = async () => {
-    if (mongoose.connection.readyState >= 1) {
-        return;
-    }
-    if (!mongoUrl) {
-        console.error("CRITICAL: MONGO_URL environment variable is not defined.");
-        return;
-    }
-    try {
-        await mongoose.connect(mongoUrl, {
-            serverSelectionTimeoutMS: 5000,
-            family: 4
-        });
-        console.log("✅ MongoDB Connected");
-    } catch (err) {
-        console.error("❌ MongoDB Connection Error:", err.message);
-    }
-};
+// Global cached connection for Serverless (Vercel) & Local
+let cached = global.mongoose;
 
-// Initial connection
-connectDB();
+if (!cached) {
+    cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+    if (cached.conn) {
+        return cached.conn;
+    }
+
+    if (!mongoUrl) {
+        console.warn("⚠️ MONGO_URL not defined. Please configure it in .env or Vercel Environment Variables.");
+        return null;
+    }
+
+    if (!cached.promise) {
+        const opts = {
+            bufferCommands: false,
+            serverSelectionTimeoutMS: 5000,
+            family: 4,
+            maxPoolSize: 10
+        };
+
+        cached.promise = mongoose.connect(mongoUrl, opts).then((mongooseInstance) => {
+            console.log("✅ MongoDB Connected Successfully");
+            return mongooseInstance;
+        }).catch((err) => {
+            cached.promise = null;
+            console.error("❌ MongoDB Connection Error:", err.message);
+            throw err;
+        });
+    }
+
+    try {
+        cached.conn = await cached.promise;
+    } catch (e) {
+        cached.promise = null;
+        console.error("Database connection failed:", e.message);
+    }
+
+    return cached.conn;
+}
+
+// Initial connection attempt
+connectDB().catch(() => {});
 
 const db = mongoose.connection;
-
-db.on("connected", () => {
-    console.log("MongoDB Connection state: Connected");
-});
-
-db.on("disconnected", () => {
-    console.log("MongoDB Connection state: Disconnected");
-});
-
-db.on("error", (err) => {
-    console.error("MongoDB Runtime Error:", err.message);
-});
 
 module.exports = { db, connectDB };

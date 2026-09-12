@@ -1,4 +1,5 @@
 const Staff = require("../models/staffmodel");
+const { connectDB } = require("../config/db");
 
 const authController = {
 
@@ -16,6 +17,7 @@ const authController = {
 
     login: async (req, res) => {
         try {
+            await connectDB();
             const { email, password } = req.body;
             const inputEmail = (email || "").trim().toLowerCase();
             const inputPassword = (password || "").trim();
@@ -31,7 +33,7 @@ const authController = {
                 return res.redirect("/?msg=" + encodeURIComponent("Welcome back, Admin!"));
             }
 
-            // 2. Check Maintenance Staff Credentials (only registered staff can login)
+            // 2. Check Maintenance Staff Credentials
             const staffMember = await Staff.findOne({ email: inputEmail });
             if (staffMember) {
                 if (staffMember.password === inputPassword) {

@@ -1,20 +1,22 @@
 const Complaints = require("../models/complaintmodel");
 const Residents = require("../models/residentmodel");
 const Staff = require("../models/staffmodel");
+const { connectDB } = require("../config/db");
 
 const complaintController = {
 
     home: async (req, res) => {
         try {
-            const totalComplaints = await Complaints.countDocuments();
-            const pendingComplaints = await Complaints.countDocuments({ status: "Pending" });
-            const assignedComplaints = await Complaints.countDocuments({ status: "Assigned" });
-            const inProgressComplaints = await Complaints.countDocuments({ status: "In Progress" });
-            const resolvedComplaints = await Complaints.countDocuments({ status: "Resolved" });
-            const rejectedComplaints = await Complaints.countDocuments({ status: "Rejected" });
+            await connectDB();
+            const totalComplaints = await Complaints.countDocuments().catch(() => 0);
+            const pendingComplaints = await Complaints.countDocuments({ status: "Pending" }).catch(() => 0);
+            const assignedComplaints = await Complaints.countDocuments({ status: "Assigned" }).catch(() => 0);
+            const inProgressComplaints = await Complaints.countDocuments({ status: "In Progress" }).catch(() => 0);
+            const resolvedComplaints = await Complaints.countDocuments({ status: "Resolved" }).catch(() => 0);
+            const rejectedComplaints = await Complaints.countDocuments({ status: "Rejected" }).catch(() => 0);
             
-            const totalResidents = await Residents.countDocuments();
-            const totalStaff = await Staff.countDocuments();
+            const totalResidents = await Residents.countDocuments().catch(() => 0);
+            const totalStaff = await Staff.countDocuments().catch(() => 0);
 
             // Category-wise Breakdown
             const categories = [
@@ -32,8 +34,8 @@ const complaintController = {
 
             const categoryBreakdown = await Promise.all(
                 categories.map(async (cat) => {
-                    const count = await Complaints.countDocuments({ category: cat });
-                    const resolved = await Complaints.countDocuments({ category: cat, status: "Resolved" });
+                    const count = await Complaints.countDocuments({ category: cat }).catch(() => 0);
+                    const resolved = await Complaints.countDocuments({ category: cat, status: "Resolved" }).catch(() => 0);
                     return {
                         category: cat,
                         count,
@@ -47,9 +49,9 @@ const complaintController = {
             const blocks = ["A", "B", "C", "D", "E"];
             const blockBreakdown = await Promise.all(
                 blocks.map(async (block) => {
-                    const count = await Complaints.countDocuments({ wing: block });
-                    const pending = await Complaints.countDocuments({ wing: block, status: { $ne: "Resolved" } });
-                    const resolved = await Complaints.countDocuments({ wing: block, status: "Resolved" });
+                    const count = await Complaints.countDocuments({ wing: block }).catch(() => 0);
+                    const pending = await Complaints.countDocuments({ wing: block, status: { $ne: "Resolved" } }).catch(() => 0);
+                    const resolved = await Complaints.countDocuments({ wing: block, status: "Resolved" }).catch(() => 0);
                     return {
                         block: "Block " + block,
                         wing: block,
@@ -60,11 +62,12 @@ const complaintController = {
                 })
             );
 
-            // Recent status updates / notifications
+            // Recent status updates
             const recentActivity = await Complaints.find()
                 .sort({ updatedAt: -1 })
                 .limit(5)
-                .select("complaintId title residentName wing flatNo status updatedAt assignedStaff");
+                .select("complaintId title residentName wing flatNo status updatedAt assignedStaff")
+                .catch(() => []);
 
             res.render("home.ejs", {
                 stats: {
@@ -82,18 +85,9 @@ const complaintController = {
                 recentActivity
             });
         } catch (err) {
-            console.error("Error loading dashboard analytics:", err);
+            console.error("Error loading dashboard:", err);
             res.render("home.ejs", {
-                stats: {
-                    totalComplaints: 0,
-                    pendingComplaints: 0,
-                    assignedComplaints: 0,
-                    inProgressComplaints: 0,
-                    resolvedComplaints: 0,
-                    rejectedComplaints: 0,
-                    totalResidents: 0,
-                    totalStaff: 0
-                },
+                stats: { totalComplaints: 0, pendingComplaints: 0, assignedComplaints: 0, inProgressComplaints: 0, resolvedComplaints: 0, rejectedComplaints: 0, totalResidents: 0, totalStaff: 0 },
                 categoryBreakdown: [],
                 blockBreakdown: [],
                 recentActivity: []
@@ -103,6 +97,7 @@ const complaintController = {
 
     getdata: async (req, res) => {
         try {
+            await connectDB();
             const { status, priority, category, wing, search, msg } = req.query;
             let filter = {};
 
@@ -128,8 +123,8 @@ const complaintController = {
                 ];
             }
 
-            const complaint = await Complaints.find(filter).sort({ createdAt: -1 });
-            const staffList = await Staff.find().select("name specialty staffId availability");
+            const complaint = await Complaints.find(filter).sort({ createdAt: -1 }).catch(() => []);
+            const staffList = await Staff.find().select("name specialty staffId availability").catch(() => []);
 
             res.render("complaints.ejs", { 
                 complaint,
@@ -144,14 +139,20 @@ const complaintController = {
                 } 
             });
         } catch (err) {
-            console.log("Error fetching complaints:", err);
-            res.send("Error fetching complaints");
+            console.error("Error fetching complaints:", err);
+            res.render("complaints.ejs", {
+                complaint: [],
+                staffList: [],
+                notification: "Database connection initializing... Please refresh in a moment.",
+                filter: { status: "All", priority: "All", category: "All", wing: "All", search: "" }
+            });
         }
     },
 
     addpage: async (req, res) => {
         try {
-            const staffList = await Staff.find().select("name specialty staffId availability");
+            await connectDB();
+            const staffList = await Staff.find().select("name specialty staffId availability").catch(() => []);
             res.render("complaintform.ejs", { staffList });
         } catch (err) {
             res.render("complaintform.ejs", { staffList: [] });
@@ -160,21 +161,20 @@ const complaintController = {
 
     adddata: async (req, res) => {
         try {
+            await connectDB();
             if (!req.body.complaintId || req.body.complaintId.trim() === "") {
-                const count = await Complaints.countDocuments();
+                const count = await Complaints.countDocuments().catch(() => 0);
                 req.body.complaintId = "CMP-" + String(1001 + count);
             }
 
-            // Initial timeline event
             req.body.timeline = [
                 {
                     status: req.body.status || "Pending",
-                    note: "Complaint submitted by resident.",
+                    note: "Complaint registered by resident.",
                     updatedAt: new Date()
                 }
             ];
 
-            // If staff is assigned upon creation, transition status to Assigned
             if (req.body.assignedStaff && req.body.assignedStaff !== "Unassigned" && req.body.status === "Pending") {
                 req.body.status = "Assigned";
                 req.body.timeline.push({
@@ -187,33 +187,34 @@ const complaintController = {
             await Complaints.create(req.body);
             res.redirect("/view?msg=" + encodeURIComponent(`Complaint #${req.body.complaintId} submitted successfully!`));
         } catch (err) {
-            console.log("Error adding complaint:", err);
-            res.send("Error adding complaint: " + err.message);
+            console.error("Error adding complaint:", err);
+            res.redirect("/view?msg=" + encodeURIComponent("Error registering complaint: " + err.message));
         }
     },
 
     editpage: async (req, res) => {
         try {
+            await connectDB();
             const complaint = await Complaints.findById(req.params.id);
             if (!complaint) {
-                return res.status(404).send("Complaint not found");
+                return res.status(404).send("Complaint ticket not found. <a href='/view'>Back to list</a>");
             }
-            const staffList = await Staff.find().select("name specialty staffId availability");
+            const staffList = await Staff.find().select("name specialty staffId availability").catch(() => []);
             res.render("complaintedit.ejs", { complaint, staffList });
         } catch (err) {
             console.error("Error finding complaint:", err);
-            res.status(500).send("Complaint not found or invalid ID");
+            res.status(500).send("Error loading ticket details. <a href='/view'>Back to list</a>");
         }
     },
 
     updatedata: async (req, res) => {
         try {
+            await connectDB();
             const existing = await Complaints.findById(req.params.id);
             if (!existing) {
-                return res.status(404).send("Complaint not found");
+                return res.status(404).send("Complaint ticket not found");
             }
 
-            // If status changed or notes added, append to timeline
             let timeline = existing.timeline || [];
             if (req.body.status && req.body.status !== existing.status) {
                 timeline.push({
@@ -229,23 +230,25 @@ const complaintController = {
             res.redirect("/view?msg=" + encodeURIComponent(`Complaint #${existing.complaintId} updated to '${req.body.status}'`));
         } catch (err) {
             console.error("Error updating complaint:", err);
-            res.status(500).send("Error updating complaint: " + err.message);
+            res.redirect("/view?msg=" + encodeURIComponent("Error updating ticket: " + err.message));
         }
     },
 
     deletedata: async (req, res) => {
         try {
+            await connectDB();
             const complaint = await Complaints.findByIdAndDelete(req.params.id);
             const ref = complaint ? complaint.complaintId : "Record";
             res.redirect("/view?msg=" + encodeURIComponent(`${ref} deleted successfully.`));
         } catch (err) {
             console.error("Error deleting complaint:", err);
-            res.status(500).send("Error deleting complaint");
+            res.redirect("/view?msg=" + encodeURIComponent("Error deleting complaint."));
         }
     },
 
     quickStatus: async (req, res) => {
         try {
+            await connectDB();
             const { status, assignedStaff } = req.body;
             const existing = await Complaints.findById(req.params.id);
             if (!existing) {
@@ -259,7 +262,7 @@ const complaintController = {
                 updatePayload.status = status;
                 timeline.push({
                     status,
-                    note: `Status changed to ${status}`,
+                    note: `Status updated to ${status}`,
                     updatedAt: new Date()
                 });
             }
@@ -282,7 +285,7 @@ const complaintController = {
             res.redirect("/view?msg=" + encodeURIComponent(`Status for #${existing.complaintId} updated to '${updatePayload.status || existing.status}'`));
         } catch (err) {
             console.error("Error updating status:", err);
-            res.status(500).send("Error updating status");
+            res.redirect("/view?msg=" + encodeURIComponent("Error updating status."));
         }
     }
 };

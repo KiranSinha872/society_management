@@ -1,5 +1,5 @@
 const Residents = require("../models/residentmodel");
-const Complaints = require("../models/complaintmodel");
+const { connectDB } = require("../config/db");
 
 const residentController = {
 
@@ -9,6 +9,7 @@ const residentController = {
 
     getdata: async (req, res) => {
         try {
+            await connectDB();
             const { wing, residentType, search } = req.query;
             let filter = {};
 
@@ -27,14 +28,17 @@ const residentController = {
                 ];
             }
 
-            const resident = await Residents.find(filter).sort({ wing: 1, flatNo: 1 });
+            const resident = await Residents.find(filter).sort({ wing: 1, flatNo: 1 }).catch(() => []);
             res.render("residents.ejs", { 
                 resident,
                 filter: { wing: wing || "All", residentType: residentType || "All", search: search || "" }
             });
         } catch (err) {
-            console.log("Error fetching residents:", err);
-            res.send("Error fetching residents");
+            console.error("Error fetching residents:", err);
+            res.render("residents.ejs", {
+                resident: [],
+                filter: { wing: "All", residentType: "All", search: "" }
+            });
         }
     },
 
@@ -44,44 +48,48 @@ const residentController = {
 
     adddata: async (req, res) => {
         try {
+            await connectDB();
             await Residents.create(req.body);
             res.redirect("/residents/view");
         } catch (err) {
-            console.log("Error adding resident:", err);
-            res.send("Error adding resident: " + err.message);
+            console.error("Error adding resident:", err);
+            res.redirect("/residents/view?msg=" + encodeURIComponent("Error adding resident: " + err.message));
         }
     },
 
     editpage: async (req, res) => {
         try {
+            await connectDB();
             const resident = await Residents.findById(req.params.id);
             if (!resident) {
-                return res.status(404).send("Resident not found");
+                return res.status(404).send("Resident record not found. <a href='/residents/view'>Back to list</a>");
             }
             res.render("residentedit.ejs", { resident });
         } catch (err) {
             console.error("Error finding resident:", err);
-            res.status(500).send("Resident not found or invalid ID");
+            res.status(500).send("Resident not found or invalid ID. <a href='/residents/view'>Back to list</a>");
         }
     },
 
     updatedata: async (req, res) => {
         try {
+            await connectDB();
             await Residents.findByIdAndUpdate(req.params.id, req.body, { runValidators: true });
             res.redirect("/residents/view");
         } catch (err) {
             console.error("Error updating resident:", err);
-            res.status(500).send("Error updating resident: " + err.message);
+            res.redirect("/residents/view?msg=" + encodeURIComponent("Error updating resident: " + err.message));
         }
     },
 
     deletedata: async (req, res) => {
         try {
+            await connectDB();
             await Residents.findByIdAndDelete(req.params.id);
             res.redirect("/residents/view");
         } catch (err) {
             console.error("Error deleting resident:", err);
-            res.status(500).send("Error deleting resident");
+            res.redirect("/residents/view?msg=" + encodeURIComponent("Error deleting resident."));
         }
     }
 };
