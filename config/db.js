@@ -12,19 +12,20 @@ if (!cached) {
 }
 
 async function connectDB() {
-    if (cached.conn) {
+    if (cached.conn && mongoose.connection.readyState === 1) {
         return cached.conn;
     }
 
     if (!mongoUrl) {
-        console.warn("⚠️ MONGO_URL not defined. Please configure it in .env or Vercel Environment Variables.");
+        console.warn("⚠️ MONGO_URL not defined in environment variables.");
         return null;
     }
 
     if (!cached.promise) {
         const opts = {
             bufferCommands: false,
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 4000,
+            connectTimeoutMS: 4000,
             family: 4,
             maxPoolSize: 10
         };
@@ -35,7 +36,7 @@ async function connectDB() {
         }).catch((err) => {
             cached.promise = null;
             console.error("❌ MongoDB Connection Error:", err.message);
-            throw err;
+            return null;
         });
     }
 

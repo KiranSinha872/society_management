@@ -11,7 +11,7 @@ app.use(async (req, res, next) => {
     try {
         await connectDB();
     } catch (e) {
-        console.error("DB connection error in middleware:", e);
+        console.error("DB connection error in middleware:", e.message);
     }
     next();
 });
@@ -63,13 +63,19 @@ app.use("/residents", residentRoutes);
 // Maintenance Staff Routes
 app.use("/staff", staffRoutes);
 
+// Global Error Handler (Prevents serverless function crash / hang)
+app.use((err, req, res, next) => {
+    console.error("Application Error:", err);
+    res.status(500).send("<h3>Something went wrong.</h3><p>" + (err.message || "") + "</p><a href='/'>Go to Home</a>");
+});
+
 // 404 Handler
 app.use((req, res) => {
     res.status(404).send("404 - Page Not Found. <a href='/'>Go to Home</a>");
 });
 
-// Server (Local development)
-if (require.main === module || process.env.NODE_ENV !== "production") {
+// Server (Local development only - not when running as a Vercel Serverless Function)
+if (!process.env.VERCEL && process.env.NODE_ENV !== "production") {
     const PORT = process.env.PORT || 3007;
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
