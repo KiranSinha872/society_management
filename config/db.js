@@ -12,11 +12,7 @@ if (!cached) {
 }
 
 async function connectDB() {
-    // 1. If already connected, return cached connection immediately
-    if (cached.conn && mongoose.connection.readyState === 1) {
-        return cached.conn;
-    }
-
+    // 1. If already connected, return connection immediately
     if (mongoose.connection.readyState === 1) {
         cached.conn = mongoose;
         return cached.conn;
@@ -30,14 +26,12 @@ async function connectDB() {
     // 2. If a connection is in progress, await the existing promise
     if (!cached.promise) {
         const opts = {
-            bufferCommands: true, // Allow Mongoose to buffer operations briefly during initial handshake
-            serverSelectionTimeoutMS: 5000, // Fail fast after 5s if Atlas is unreachable
-            connectTimeoutMS: 10000,
-            socketTimeoutMS: 45000,
+            serverSelectionTimeoutMS: 4000,
+            connectTimeoutMS: 5000,
+            socketTimeoutMS: 30000,
             maxPoolSize: 10,
             minPoolSize: 1,
-            maxIdleTimeMS: 10000,
-            family: 4
+            maxIdleTimeMS: 10000
         };
 
         cached.promise = mongoose.connect(mongoUrl, opts).then((mongooseInstance) => {
@@ -64,7 +58,6 @@ async function connectDB() {
 
 // Connection event listeners for state management
 mongoose.connection.on("disconnected", () => {
-    console.warn("⚠️ MongoDB Disconnected. Resetting cached connection pool.");
     cached.conn = null;
     cached.promise = null;
 });
@@ -75,10 +68,8 @@ mongoose.connection.on("error", (err) => {
     cached.promise = null;
 });
 
-// Initial connection attempt
-connectDB().catch(() => {});
-
 const db = mongoose.connection;
 
 module.exports = { db, connectDB };
+
 
